@@ -1,0 +1,129 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+    <style>
+
+    </style>
+    <div class="x-body layui-anim layui-anim-up">
+
+        <form class="layui-form" method='post' action="{% url post_url %}" enctype="multipart/form-data">
+            <div class="layui-form-item">
+                {% csrf_token %}
+                {{ form.as_table }}
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-xs6">
+                    <button type="reset" class="layui-btn layui-btn-radius layui-btn-normal">重置表单</button>
+                </div>
+                <div class="layui-col-xs6" align='right'>
+                    <button type="submit" class="layui-btn layui-btn-radius" lay-submit lay-filter="form_post">立即提交
+                    </button>
+                </div>
+            </div>
+        </form>
+    <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script>
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#id_start_time'
+            });
+            laydate.render({
+                elem: '#id_end_time'
+            });
+        });
+
+    </script>
+
+
+    <script>
+    //通过button按钮的id获取点击事件
+    document.getElementById("btn").onclick = function () {
+        //使用if判断，判断button按钮的value属性
+        $("#a").hide();
+    };
+</script>
+
+     <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'nodegrouplist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'group_name', title: '标签名', sort: true, fixed: true},
+                    {field: 'group_time', title: '时间', sort: true, fixed: true}
+                    , {title: '操作', fixed: 'right', align: 'center', toolbar: '#barDemo'}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.group_name;
+                if (obj.event === 'detail') {
+                    url = "{% url 'plantaskupdate' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('计划任务', url, 800);
+                }  else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该标签吗', function (index) {
+                        url = "{% url 'nodegroupdel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , key: $("#id_key").val()
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#x1007;</i>删除</a>
+        </div>
+    </script>
+
+
+
+{% endblock %}

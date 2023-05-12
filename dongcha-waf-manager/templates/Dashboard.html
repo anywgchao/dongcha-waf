@@ -1,0 +1,172 @@
+{% load staticfiles %}
+{% load custom_tag %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>土夫WEB安全防御平台</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+
+
+    <link href="{% static '/css/font.css' %}" rel="stylesheet">
+    <link href="{% static 'css/xadmin.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="'image/x-icon">
+
+
+    <script src="{% static 'jquery/jquery-3.3.1.min.js' %}"></script> <!-- jQuery Library -->
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/xadmin.js' %}"></script>
+    <script>
+        function noticecount() {
+            $.get("{% url 'noticecount' %}", function (res) {
+                if (res.notice_count != 0) {
+                    $("#noticecount").append("<span class='layui-badge'>" + res.notice_count + "</span>")
+                }
+            })
+        }
+
+        $(document).ready(function () {
+            noticecount();
+            setInterval(function () {
+                noticecount();
+            }, 60000)
+            $("#noticecount").click(function () {
+                $("#noticecount span ").remove();
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+<!-- 顶部开始 -->
+<div class="container">
+    <div class="logo"><a href="#" style="font-size: 16px"><img style="width: 24px;height: 24px" src="/static/logo.png"
+                                                               class="layui-nav-img">土夫WEB安全防御平台</a></div>
+    <div class="left_open">
+        <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+    </div>
+
+    <ul class="layui-nav right" lay-filter="">
+        <li class="layui-nav-item">
+
+            <a href="javascript:;">
+                <img src="{{ user.profile.user_head }}" class="layui-nav-img">
+                {{ user }}
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a _href="{% url 'regulations' %}" class='tab_add1'>关于</a></dd>
+                <dd><a _href="{% url 'user_data' %}" class='tab_add2'>个人资料</a></dd>
+                <dd><a onclick="x_admin_show('信息修改','{% url 'changeuserinfo' %}',600,450)">信息修改</a></dd>
+                <dd><a href="{% url  'logout' %}">退出登录</a></dd>
+            </dl>
+        </li>
+    </ul>
+
+    <ul class="layui-nav right" lay-filter="">
+        <li class="layui-nav-item">
+            <a _href="{% url 'noticeview' %}" class='tab_add' id='noticecount'><i class="layui-icon layui-icon-notice"
+                                                                                  style="font-size: 20px;"></i></a>
+        </li>e
+    </ul>
+    {% if user.is_superuser or role == '管理员'  %}
+    <ul class="layui-nav right" lay-filter="">
+        <li class="layui-nav-item">
+            <div class="UserTable">
+                <button class="layui-btn layui-btn-sm" style="background-color:#ff6a00" data-type="disablechoice"><i
+                        class="layui-icon layui-icon-refresh-3"></i>重新加载
+                </button>
+            </div>
+        </li>
+    </ul>
+    {% endif %}
+</div>
+<!-- 顶部结束 -->
+<!-- 中部开始 -->
+<!-- 左侧菜单开始 -->
+<div class="left-nav">
+    <div id="side-nav">
+        <ul id="nav">
+            {% rbac_menu request %}
+        </ul>
+    </div>
+</div>
+<!-- 左侧菜单结束 -->
+<!-- 右侧主体开始 -->
+<div class="page-content">
+    <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+        <ul class="layui-tab-title">
+            <li class="home"><i class="layui-icon">&#xe68e;</i>我的桌面</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src="{% url 'main' %}" frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-content-bg"></div>
+<!-- 右侧主体结束 -->
+<!-- 中部结束 -->
+<!-- 底部开始 -->
+<div class="footer">
+    <div class="copyright" align='center'>Copyright ©2020 土夫WEB安全防御平台 All Rights Reserved.</div>
+</div>
+<!-- 底部结束 -->
+<script>
+    var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+    layui.use('table', function () {
+        var table = layui.table;
+        //方法级渲染
+        var $ = layui.$, active = {
+            disablechoice: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data
+                    , list = new Array();
+                for (var i = 0; i < data.length; i++) {
+                    list[i] = data[i].mail
+                }
+                layer.confirm('该操作为敏感操作<br>点击确认，重新加载站点', function (index) {
+                    $.post("{% url 'stationreload' %}", {
+                        'user_list': JSON.stringify(list),
+                        'action': 'stop',
+                        'csrfmiddlewaretoken': csrf
+                    }, function (res) {
+                        layer.msg(res.error);
+                        setTimeout(function () {
+                            location.replace(location.href);
+                        }, 2000)
+                    });
+                })
+            },
+
+            reload: function () {
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        name: $('#id_name').val()
+                        , url_name: $("#url_name").val()
+
+                    }
+                });
+            }
+        };
+
+
+        $('.UserTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+
+</body>
+</html>

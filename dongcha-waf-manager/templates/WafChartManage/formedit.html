@@ -1,0 +1,28 @@
+{% extends "index.html" %} 
+<meta charset="UTF-8">
+
+{% block index %}
+	<div class="x-body layui-anim layui-anim-up">
+		<form class="layui-form" method='post' action="{% url post_url argu %}" enctype="multipart/form-data">
+			<div class="layui-form-item">
+				{% csrf_token %}
+				{{ form.as_table }}
+			</div>
+		</form>
+	</div>
+<script>
+layui.use(['laydate'], function(){
+	var laydate = layui.laydate;
+	laydate.render({
+	    elem: '#id_up_time'
+	  });
+	laydate.render({
+	    elem: '#id_guarante_time'
+	  });
+	laydate.render({
+	    elem: '#id_down_time'
+	  });
+});
+
+</script>
+{% endblock %}

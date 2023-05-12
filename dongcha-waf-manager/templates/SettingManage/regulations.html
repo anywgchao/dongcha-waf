@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+
+    <div style="font-size: 28px;background-color: #00A2CA;color: white;height: 100px;text-align: center;line-height: 100px;margin-right: 60px;margin-left: 60px;margin-top: 10px ">
+        WEB应用防火墙
+    </div>
+    <div style="margin-top: 20px;margin-right: 60px;margin-left: 60px">
+        <ul class="layui-timeline">
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">产品型号：Enterprise</div>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">版本：{{ version }}</div>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">License：{{ license }}</div>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">技术支持信箱：support@tufusec.com</div>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">技术特点</div>
+                </div>
+            </li>
+
+        </ul>
+    </div>
+    <div class="layui-text" style="margin-left: 85px;margin-right: 60px;margin-top: -20px">
+        <ul>
+            <li>分布式: 轻松支持大规模并发访问；</li>
+            <li>规则灵活：高度自由面向站点的规则应用；</li>
+            <li>灵活切换：一键开启观察模式、拦截模式；</li>
+            <li>禁止国外站点访问：开启后，该站点只允许国内用户访问(包括香港、澳门、台湾)；</li>
+        </ul>
+    </div>
+    <div style="padding: 20px; background-color: #F2F2F2;margin-right: 60px;margin-left: 60px">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md10">
+                <div class="layui-card">
+
+                    <div class="layui-card-body" style="background-color: #00A2CA;text-align: center;color: white;font-size: 14px">
+                        警告：感谢您选择本产品，本产品受著作权法和相关国际公约的保护，<br>
+                        未经授权不得擅自复制或散布本产品的部分或全部。<br>
+                        否则将承受严厉的民事和刑事处罚，对已知的违反<br>
+                        者将给予法律范围内最严厉的制裁。<br>
+
+                    </div>
+                    <div class="layui-card-header" style="text-align: center;background-color: #F2F2F2">Copyright ©2020 土夫WEB安全防御平台 All Rights Reserved.</div>
+                </div>
+            </div>
+            <div class="layui-col-md2">
+                <div class="layui-card">
+
+                    <div class="layui-card-body" style="text-align: center; background-color: #F2F2F2">
+                        <img style="width: 100px;height: 100px;" src="{% static "images/关于.png" %}" alt="图片">
+                    </div>
+                    <div class="layui-card-header" style="text-align: center;background-color: #F2F2F2">关于我们</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

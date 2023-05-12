@@ -1,0 +1,114 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>基本设置</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="{% static 'lib/layui/css/layui.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+</head>
+<style>
+    .layui-form-label {
+        width: 140px;
+    }
+
+    .layui-form-switch {
+        height: 20px;
+        width: 40px;
+        margin-top: 9px;
+    }
+
+    .layui-btn {
+        padding-right: 80px;
+        padding-left: 80px;
+    }
+
+    .layui-input-block {
+        margin-left: 0;
+    }
+
+    .time-horizontal {
+        list-style-type: none;
+        border-top: 1px solid #707070;
+        max-width: 700px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .time-horizontal li {
+        float: left;
+        position: relative;
+        text-align: center;
+        width: 33%;
+        padding-top: 20px;
+    }
+
+    .time-horizontal li b:before {
+        content: '';
+        position: absolute;
+        top: -15px;
+        left: 42%;
+        width: 28px;
+        height: 28px;
+        border: 6px solid #009688;
+        border-radius: 20px;
+        background: white;
+    }
+
+</style>
+<body>
+
+<form class="layui-form" method='post' action="{% url 'psdverify' %}" enctype="multipart/form-data">
+    <div class="layui-form-item">
+        {% csrf_token %}
+    </div>
+    <div class="container" style="margin-bottom: 40px;margin-top: 40px">
+        <ul class="time-horizontal">
+            <li><b></b><span style="color: green">验证身份</span></li>
+            <li><b></b><span style="color: gainsboro">安装应用</span></li>
+            <li><b></b><span style="color: gainsboro">绑定MFA</span></li>
+        </ul>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong>温馨提示!</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    <div style="text-align: center;margin-top: 50px">
+        <span style="font-size: 14px;font-weight: bold;">安全令牌验证  账户  <span style="color: red">{{ user }}</span>  请按照以下步骤完成绑定操作</span>
+    </div>
+    <div class="layui-form-item" style="margin-top: 50px;">
+        <label class="layui-form-label">用户名</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="username" lay-verify="required|time" placeholder="请输入用户名" autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="password" name="password" lay-verify="pass" placeholder="请输入密码" autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item" style="text-align: center;margin-top: 40px;margin-right: 20px">
+            <div class="layui-input-block">
+                <button style="width: 230px;border-radius:5px;" class="layui-btn" lay-submit lay-filter="formDemo">下一步</button>
+            </div>
+    </div>
+
+
+</form>
+
+</body>
+</html>

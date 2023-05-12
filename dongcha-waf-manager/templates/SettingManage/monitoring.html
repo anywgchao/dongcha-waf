@@ -1,0 +1,449 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">监控</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-tab layui-tab-card">
+            <div class="layui-tab-content" style="height: 100%">
+                <table class="layui-table" lay-skin="nob" lay-size="sm">
+                    <colgroup>
+                        <col width="140">
+                        <col width="200">
+                        <col>
+                    </colgroup>
+
+                    <tbody>
+                    <tr>
+                        <td lay-data="{align:'center'}" rowspan="5"><img style="width: 100px;height: 150px;"
+                                                                         src="{% static "images/主机.png" %}" alt="图片">
+                        </td>
+                        <td>系统状况:</td>
+                        <td style="color: green">正常</td>
+                        <td style="font-size: 16px">资源使用达到上限警告</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>已不间断运行:</td>
+                        <td style="color: #1E9FFF">{{ data.uptime }}天 {{ data.second }}</td>
+                        <td><input type="checkbox" name="" title="写作" lay-skin="primary" checked>&nbsp;开启后,CPU使用率达到80%以上报警/5分钟
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>主机名:</td>
+                        <td>{{ data.host }}</td>
+                        <td><input type="checkbox" name="" title="写作" lay-skin="primary" checked>&nbsp;开启后,内存使用率达到80%以上报警/5分钟
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>系统类型:</td>
+                        <td>{{ data.version }}</td>
+                        <td><input type="checkbox" name="" title="写作" lay-skin="primary" checked>&nbsp;开启后,磁盘使用率达到80%以上报警/5分钟
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>系统当前时间:</td>
+                        <td>{{ data.time }}</td>
+                        <td style="color: green">磁盘总量{{ data.total }}GB,&nbsp;磁盘已使用{{ data.used }}GB,&nbsp;磁盘使用率{{ data.percent }}%</td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="layui-tab layui-tab-card">
+            <div class="layui-tab-content" style="height: 100%">
+
+                <div class="layui-tab-item layui-show">
+                    <div style="padding: 20px; background-color: #F2F2F2;">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">资源使用率</div>
+                                    <div class="layui-card-body">
+                                        <div id='container1' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">负载详情</div>
+                                    <div class="layui-card-body">
+                                        <div id='container2' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; background-color: #F2F2F2;">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">CPU</div>
+                                    <div class="layui-card-body">
+                                        <div id='container3' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">内存</div>
+                                    <div class="layui-card-body">
+                                        <div id='container4' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; background-color: #F2F2F2;">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">磁盘IO</div>
+                                    <div class="layui-card-body">
+                                        <div id='container5' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md6">
+                                <div class="layui-card">
+                                    <div class="layui-card-header">网络IO</div>
+                                    <div class="layui-card-body">
+                                        <div id='container6' style="width: 100%;height:290px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+
+
+    <script type="text/javascript">
+        var dom = document.getElementById("container1");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['资源使用率']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Resource = echarts.init(document.getElementById('container1'));
+
+        Resource.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Resource.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '资源使用率',
+                        type: 'line',
+                        smooth: true,
+                        data: data.resource_date
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container2");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['1分钟', '5分钟', '15分钟']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Load = echarts.init(document.getElementById('container2'));
+
+        Load.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Load.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '1分钟',
+                        type: 'line',
+                        smooth: true,
+                        data: data.load_date
+                    },
+                    {
+                        name: '5分钟',
+                        type: 'line',
+                        smooth: true,
+                        data: data.load_date1
+                    },
+                    {
+                        name: '15分钟',
+                        type: 'line',
+                        smooth: true,
+                        data: data.load_date2
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container3");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['cpu百分比']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Cpu = echarts.init(document.getElementById('container3'));
+
+        Cpu.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Cpu.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: 'cpu百分比',
+                        type: 'line',
+                        smooth: true,
+                        data: data.cpu_date
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container4");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['内存使用百分比']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Mem = echarts.init(document.getElementById('container4'));
+
+        Mem.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Mem.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '内存使用百分比',
+                        type: 'line',
+                        smooth: true,
+                        data: data.mem_date
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container5");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['读取字节数', '写入字节数']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Disk = echarts.init(document.getElementById('container5'));
+
+        Disk.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Disk.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '读取字节数',
+                        type: 'line',
+                        smooth: true,
+                        data: data.disk_date
+                    },
+                    {
+                        name: '写入字节数',
+                        type: 'line',
+                        smooth: true,
+                        data: data.disk_wdate
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container6");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        option = {
+            xAxis: {
+                type: 'category',
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            legend: {
+                data: ['上行', '下行']
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                smooth: true
+            }]
+        };
+        var Net = echarts.init(document.getElementById('container6'));
+
+        Net.setOption(option);
+        $.get("{% url 'hostview' %}").done(function (data) {
+            Net.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '上行',
+                        type: 'line',
+                        smooth: true,
+                        data: data.net_date
+                    },
+                    {
+                        name: '下行',
+                        type: 'line',
+                        smooth: true,
+                        data: data.net_wdate
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script>
+        window.setTimeout(function () {
+            window.location.reload();
+        }, 50000);
+    </script>
+
+{% endblock %}

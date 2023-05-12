@@ -1,0 +1,120 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+
+	<div class="x-body layui-anim layui-anim-up">
+		<form class="layui-form" method='post' action="{% url post_url argu %}" enctype="multipart/form-data">
+			<div class="layui-form-item">
+				{% csrf_token %}
+				{{ form.as_table }}
+			</div>
+            <label for ='id_content'>是否启用:</label><br/>
+            <input type="radio" name="rule_use" value="0" title="是" checked>
+            <input type="radio" name="rule_use" value="1" title="否" {{ radios.rule_use }}><br/>
+            <label for ='id_content'>是否有日志:</label><br/>
+            <input type="radio" name="log" value="0" title="是" checked>
+            <input type="radio" name="log" value="1" title="否" {{ radios.log }}><br/>
+            <label for ='id_content'>延迟请求:</label><br/>
+            <input type="radio" name="delay" value="0" title="是" checked>
+            <input type="radio" name="delay" value="1" title="否" {{ radios.delay }}><br/>
+            <label for ='id_content'>全局防护:</label><br/>
+            <input type="radio" name="global_defend" value="0" title="是" checked>
+            <input type="radio" name="global_defend" value="1" title="否" {{ radios.global_defend }}><br/>
+            <label for ='id_content'>是否取反:</label><br/>
+            <input type="radio" name="resulr_negation" value="0" title="是" >
+            <input type="radio" name="resulr_negation" value="1" title="否" {{ radios.resulr_negation }} checked><br/>
+
+             <label for ='id_content'>标识参数:</label><br/>
+            <div class="layui-form-item" style="overflow:scroll; width:auto; height:200px;" >
+                <input type="checkbox" value="SERVER_ADDR" name="check_box_list" title="服务器IP地址(SERVER_ADDR)" lay-skin="primary" {{ sign_check.SERVER_ADDR }}><br/>
+                <input type="checkbox" value="SERVER_NAME" name="check_box_list" title="服务器名称(SERVER_NAME)" lay-skin="primary" {{ sign_check.SERVER_NAME }}><br/>
+                <input type="checkbox" value="REMOTE_ADDR" name="check_box_list" title="客户端IP地址(REMOTE_ADDR)" lay-skin="primary" {{ sign_check.REMOTE_ADDR }}><br/>
+                <input type="checkbox" value="URI" name="check_box_list" title=HTTP请求URI地址(URI) lay-skin="primary" {{ sign_check.URI }}><br/>
+                <input type="checkbox" value="ARGS" name="check_box_list" title="请求参数值(ARGS)" lay-skin="primary" {{ sign_check.ARGS }}><br/>
+                <input type="checkbox" value="REQUEST_COOKIES" name="check_box_list" title="Cookie参数值(REQUEST_COOKIES)" lay-skin="primary" {{ sign_check.REQUEST_COOKIES }}><br/>
+            </div>
+
+
+            <label for ='id_content'>参数选择:</label><br/>
+            <div class="layui-form-item" style="overflow:scroll; width:auto; height:300px;" >
+                <input type="checkbox" value="ARGS" name="check_box_list1" title="请求参数值(ARGS)" lay-skin="primary" {{ select_check.ARGS }}>
+                        <input type="radio" name="ARGS" value="rule_specific" title="指定特定参数" {{ extra.ARGS.rule_specific }}>
+                        <input type="radio" name="ARGS" value="rule_ignore" title="忽略特定参数" {{ extra.ARGS.rule_ignore }}><br/>
+                        <input style="width: 80%;height: 30px" type="text" name="ARGS"  placeholder="请输入参数名 并以英文,逗号分隔" autocomplete="off" class="layui-input" value="{{ extra.ARGS.input }}" >
+                <input type="checkbox" value="ARGS_GET" name="check_box_list1" title="请求参数值(ARGS_GET)" lay-skin="primary" {{ select_check.ARGS_GET }}>
+                        <input type="radio" name="ARGS_GET" value="rule_specific" title="指定特定参数" {{ extra.ARGS_GET.rule_specific }}>
+                        <input type="radio" name="ARGS_GET" value="rule_ignore" title="忽略特定参数" {{ extra.ARGS_GET.rule_ignore }}><br/>
+                        <input style="width: 80%;height: 30px" type="text" name="ARGS_GET"  placeholder="请输入参数名 并以英文,逗号分隔" autocomplete="off" class="layui-input" value="{{ extra.ARGS_GET.input }}">
+                <input type="checkbox" value="ARGS_POST" name="check_box_list1" title="请求参数值(ARGS_POST)" lay-skin="primary" {{ select_check.ARGS_POST }}>
+                        <input type="radio" name="ARGS_POST" value="rule_specific" title="指定特定参数" {{ extra.ARGS_POST.rule_specific }}>
+                        <input type="radio" name="ARGS_POST" value="rule_ignore" title="忽略特定参数" {{ extra.ARGS_POST.rule_ignore }}><br/>
+                        <input style="width: 80%;height: 30px" type="text" name="ARGS_POST"  placeholder="请输入参数名 并以英文,逗号分隔" autocomplete="off" class="layui-input" value="{{ extra.ARGS_POST.input }}">
+                <input type="checkbox" value="REQUEST_COOKIES" name="check_box_list1" title="Cookie参数值(REQUEST_COOKIES)" lay-skin="primary" {{ select_check.REQUEST_COOKIES }}>
+                        <input type="radio" name="REQUEST_COOKIES" value="rule_specific" title="指定特定参数" {{ extra.REQUEST_COOKIES.rule_specific }}>
+                        <input type="radio" name="REQUEST_COOKIES" value="rule_ignore" title="忽略特定参数" {{ extra.REQUEST_COOKIES.rule_ignore }}><br/>
+                        <input style="width: 80%;height: 30px" type="text" name="REQUEST_COOKIES"  placeholder="请输入参数名 并以英文,逗号分隔" autocomplete="off" class="layui-input" value="{{ extra.REQUEST_COOKIES.input }}">
+                <input type="checkbox" value="REQUEST_HEADERS" name="check_box_list1" title="HTTP请求头参数值(REQUEST_HEADERS)" lay-skin="primary" {{ select_check.REQUEST_HEADERS }}>
+                        <input type="radio" name="REQUEST_HEADERS" value="rule_specific" title="指定特定参数" {{ extra.REQUEST_HEADERS.rule_specific }}>
+                        <input type="radio" name="REQUEST_HEADERS" value="rule_ignore" title="忽略特定参数" {{ extra.REQUEST_HEADERS.rule_ignore }}><br/>
+                        <input style="width: 80%;height: 30px" type="text" name="REQUEST_HEADERS"  placeholder="请输入参数名 并以英文,逗号分隔" autocomplete="off" class="layui-input" value="{{ extra.REQUEST_HEADERS.input }}">
+                <input type="checkbox" value="ARGS_NAMES" name="check_box_list1" title="请求参数名(ARGS_NAMES)" lay-skin="primary" {{ select_check.ARGS_NAMES }}><br/>
+                <input type="checkbox" value="ARGS_GET_NAMES" name="check_box_list1" title="请求参数名(ARGS_GET_NAMES)" lay-skin="primary" {{ select_check.ARGS_GET_NAMES }}><br/>
+                <input type="checkbox" value="ARGS_POST_NAMES" name="check_box_list1" title="请求参数名(ARGS_POST_NAMES)" lay-skin="primary" {{ select_check.ARGS_POST_NAMES }}><br/>
+                <input type="checkbox" value="REQUEST_HEADERS_NAMES" name="check_box_list1" title="HTTP请求头参数名(REQUEST_HEADERS_NAMES)" lay-skin="primary" {{ select_check.REQUEST_HEADERS_NAMES }}><br/>
+                <input type="checkbox" value="REQUEST_COOKIES_NAMES" name="check_box_list1" title="Cookie参数名(REQUEST_COOKIES_NAMES)" lay-skin="primary" {{ select_check.REQUEST_COOKIES_NAMES }}><br/>
+                <input type="checkbox" value="REMOTE_ADDR" name="check_box_list1" title="客户端IP地址(REMOTE_ADDR)" lay-skin="primary" {{ select_check.REMOTE_ADDR }}><br/>
+                <input type="checkbox" value="BIN_REMOTE_ADDR" name="check_box_list1" title="客户端二进制IP地址(BIN_REMOTE_ADDR)" lay-skin="primary" {{ select_check.BIN_REMOTE_ADDR }}><br/>
+                <input type="checkbox" value="SCHEME" name="check_box_list1" title="HTTP请求协议(SCHEME)" lay-skin="primary" {{ select_check.SCHEME }}><br/>
+                <input type="checkbox" value="HTTP_VERSION" name="check_box_list1" title="HTTP请求协议版本号(HTTP_VERSION)" lay-skin="primary" {{ select_check.HTTP_VERSION }}><br/>
+                <input type="checkbox" value="SERVER_ADDR" name="check_box_list1" title="服务器IP地址(SERVER_ADDR)" lay-skin="primary" {{ select_check.SERVER_ADDR }}><br/>
+                <input type="checkbox" value="SERVER_NAME" name="check_box_list1" title="服务器名称(SERVER_NAME)" lay-skin="primary" {{ select_check.SERVER_NAME }}><br/>
+                <input type="checkbox" value="SERVER_PORT" name="check_box_list1" title="服务器端口(SERVER_PORT)" lay-skin="primary" {{ select_check.SERVER_PORT }}><br/>
+                <input type="checkbox" value="REQUEST_METHOD" name="check_box_list1" title="HTTP请求方法(REQUEST_METHOD)" lay-skin="primary" {{ select_check.REQUEST_METHOD }}><br/>
+                <input type="checkbox" value="URI" name="check_box_list1" title="HTTP请求URI地址(URI)" lay-skin="primary" {{ select_check.URI }}><br/>
+                <input type="checkbox" value="REQUEST_URI" name="check_box_list1" title="HTTP请求URI地址+参数(REQUEST_URI)" lay-skin="primary" {{ select_check.REQUEST_URI }}><br/>
+                <input type="checkbox" value="QUERY_STRING" name="check_box_list1" title="未解码URL请求参数值(QUERY_STRING)" lay-skin="primary" {{ select_check.QUERY_STRING }}><br/>
+                <input type="checkbox" value="HTTP_USER_AGENT" name="check_box_list1" title="HTTP请求头USER_AGENT参数值(HTTP_USER_AGENT)" lay-skin="primary" {{ select_check.HTTP_USER_AGENT }}><br/>
+                <input type="checkbox" value="HTTP_REFERER" name="check_box_list1" title="HTTP请求头REFERER参数值(HTTP_REFERER)" lay-skin="primary" {{ select_check.HTTP_REFERER }}><br/>
+                <input type="checkbox" value="FILE_NAMES" name="check_box_list1" title="文件上传名称(FILE_NAMES)" lay-skin="primary" {{ select_check.FILE_NAMES }}><br/>
+                <input type="checkbox" value="FILE_TYPES" name="check_box_list1" title="文件上传类型(FILE_TYPES)" lay-skin="primary" {{ select_check.FILE_TYPES }}><br/>
+                <input type="checkbox" value="RX_CAPTURE" name="check_box_list1" title="规则正则匹配值(RX_CAPTURE)" lay-skin="primary" {{ select_check.RX_CAPTURE }}><br/>
+                <input type="checkbox" value="RAW_HEADER" name="check_box_list1" title="原始请求头(RAW_HEADER)" lay-skin="primary" {{ select_check.RAW_HEADER }}><br/>
+            </div>
+            <label for ='id_content'>参数处理:</label><br/>
+            <div class="layui-form-item" style="overflow:scroll; width:auto; height:300px;" >
+                <input type="checkbox" value="none" name="check_box_list2" title="NONE(不进行处理时选择该项)" lay-skin="primary" {{ handle_check.none }}><br/>
+                <input type="checkbox" value="base64Decode" name="check_box_list2" title="base64解码(base64Decode)" lay-skin="primary" {{ handle_check.base64Decode }}><br/>
+                <input type="checkbox" value="base64Encode" name="check_box_list2" title="base64编码(base64Encode)" lay-skin="primary" {{ handle_check.base64Encode }}><br/>
+                <input type="checkbox" value="hexDecode" name="check_box_list2" title="十六进制解码(hexDecode)" lay-skin="primary" {{ handle_check.hexDecode }}><br/>
+                <input type="checkbox" value="hexEncode" name="check_box_list2" title="十六进制编码(hexEncode)" lay-skin="primary" {{ handle_check.hexEncode }}><br/>
+                <input type="checkbox" value="htmlDecode" name="check_box_list2" title="HTML解码(htmlDecode)" lay-skin="primary" {{ handle_check.htmlDecode }}><br/>
+                <input type="checkbox" value="length" name="check_box_list2" title="计算数据长度(length)" lay-skin="primary" {{ handle_check.length }}><br/>
+                <input type="checkbox" value="lowercase" name="check_box_list2" title="所有数据小写(lowercase)" lay-skin="primary" {{ handle_check.lowercase }}><br/>
+                <input type="checkbox" value="md5" name="check_box_list2" title="计算数据md5值(md5)" lay-skin="primary" {{ handle_check.md5 }}><br/>
+                <input type="checkbox" value="sha1" name="check_box_list2" title="计算数据sha1值(sha1)" lay-skin="primary" {{ handle_check.sha1 }}><br/>
+                <input type="checkbox" value="sqlHexDecode" name="check_box_list2" title="SQL十六进制解码(sqlHexDecode)" lay-skin="primary" {{ handle_check.sqlHexDecode }}><br/>
+                <input type="checkbox" value="removeComments" name="check_box_list2" title="删除注释内容(removeComments)" lay-skin="primary" {{ handle_check.removeComments }}><br/>
+                <input type="checkbox" value="removeCommentsChar" name="check_box_list2" title="删除注释字符(removeCommentsChar)" lay-skin="primary" {{ handle_check.removeCommentsChar }}><br/>
+                <input type="checkbox" value="replace_comments" name="check_box_list2" title="替换注释内容为空格(replace_comments)" lay-skin="primary" {{ handle_check.replace_comments }}><br/>
+                <input type="checkbox" value="removeWhitespace" name="check_box_list2" title="删除所有空白字符(removeWhitespace)" lay-skin="primary" {{ handle_check.removeWhitespace }}><br/>
+                <input type="checkbox" value="trim" name="check_box_list2" title="删除数据两边空白字符(trim)" lay-skin="primary" {{ handle_check.trim }}><br/>
+                <input type="checkbox" value="compressWhitespace" name="check_box_list2" title="空白字符处理为空格(compressWhitespace)" lay-skin="primary" {{ handle_check.compressWhitespace }}><br/>
+                <input type="checkbox" value="cmdLine" name="check_box_list2" title="处理CMD命令行(cmdLine)" lay-skin="primary" {{ handle_check.cmdLine }}><br/>
+                <input type="checkbox" value="normalisePath" name="check_box_list2" title="处理路径字符(normalisePath)" lay-skin="primary" {{ handle_check.normalisePath }}><br/>
+                <input type="checkbox" value="uriDecode" name="check_box_list2" title="URI解码(uriDecode)" lay-skin="primary" {{ handle_check.uriDecode }}><br/>
+                <input type="checkbox" value="uriEncode" name="check_box_list2" title="URI编码(uriEncode)" lay-skin="primary" {{ handle_check.uriEncode }}><br/>
+            </div>
+			<div class="layui-row">
+				<div class="layui-col-xs6" >
+			    	<button type="reset" class="layui-btn layui-btn-radius layui-btn-normal" >重置表单</button>
+			  	</div>
+			  	<div class="layui-col-xs6" align='right'>
+			    	<button type="submit" class="layui-btn layui-btn-radius" lay-submit lay-filter="form_post" >立即提交</button>
+			  	</div>
+			 </div>
+		</form>
+	</div>
+<script>
+</script>
+{% endblock %}

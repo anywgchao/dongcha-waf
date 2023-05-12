@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+
+
+<form class="layui-form" method='post'  enctype="multipart/form-data">
+    <div class="layui-form-item">
+        {% csrf_token %}
+        {{ form.as_table }}
+    </div>
+
+    <div class="layui-form-item layui-form-text" >
+            <textarea id="show_p" name="conf" placeholder="请输入内容" class="layui-textarea" style="height: 600px">{{ log }}</textarea>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+
+
+</form>
+
+<script src="/static/lib/layui/layui.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+
+　 var text = document.getElementById('show_p').innerText; //获取json格式内容
+   document.getElementById('show_p').val= text ;
+　　
+
+</script>
+
+{% endblock %}

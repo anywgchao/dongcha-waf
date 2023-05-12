@@ -1,0 +1,236 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>用户编辑</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="{% static 'lib/layui/css/layui.css' %}" rel="stylesheet">
+    <script src="{% static 'jquery/jquery-3.3.1.min.js' %}"></script> <!-- jQuery Library -->
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/xadmin.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    <link href="{% static 'css/xadmin.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-1.12.3.min.js' %}"></script>
+
+    <style>
+        .layui-form-switch {
+            height: 20px;
+            width: 40px;
+            margin-top: 9px;
+        }
+
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
+
+        .alert-dismissible {
+            padding-right: 35px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+    </style>
+
+
+</head>
+<body>
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>更新用户</legend>
+</fieldset>
+
+<form class="layui-form" method='post' enctype="multipart/form-data">
+    <div class="layui-form-item">
+        {% csrf_token %}
+        {{ form.as_table }}
+    </div>
+    {% if error %}
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true"></span></button>
+            <strong>温馨提示!</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*登录账号</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="names" lay-verify="required" value="{{ users_data.username }}" placeholder="请填写登录名"
+                   autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*账号昵称</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="nickname" lay-verify="required" value="{{ users_data.nickname }}"
+                   placeholder="请填写昵称" autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*邮箱地址</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="mails" lay-verify="required" value="{{ users_data.mails }}" placeholder="请填写email"
+                   autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*手机号</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="phone" lay-verify="required" value="{{ users_data.phone }}" placeholder="请填写手机号"
+                   autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*角色</label>
+        <div class="layui-input-inline">
+            <select name="function">
+                <option value="">请选择职能</option>
+                {% if users_data.roles == '1' %}
+                    <option value="1" selected="">管理员</option>
+                    <option value="2">安全员</option>
+                    <option value="3">审计员</option>
+                {% elif users_data.roles == '2' %}
+                    <option value="1">管理员</option>
+                    <option value="2" selected="">安全员</option>
+                    <option value="3">审计员</option>
+                {% else %}
+                    <option value="1">管理员</option>
+                    <option value="2">安全员</option>
+                    <option value="3" selected="">审计员</option>
+                {% endif %}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*状态</label>
+        <div class="layui-input-inline">
+            <select name="status">
+                <option value="">请选择状态</option>
+                {% if users_data.status %}
+                    <option value="True" selected>启用</option>
+                    <option value="False">不启用</option>
+                {% else %}
+                    <option value="True">启用</option>
+                    <option value="False" selected>不启用</option>
+                {% endif %}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*选择标签</label>
+        <div class="layui-input-inline">
+            <select name="target">
+                <option value="">标签</option>
+                {% for item in targets %}
+                    {% if item.group_target == users_data.title %}
+                        <option value="{{ item.group_target }}" selected>{{ item.group_name }}</option>
+                    {% else %}
+                        <option value="{{ item.group_target }}">{{ item.group_name }}</option>
+                    {% endif %}
+                {% endfor %}>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*MFA认证</label>
+        <div class="layui-input-block">
+            <input type="radio" name="mfa" value="开启" title="开启">
+            <input type="radio" name="mfa" value="关闭" title="关闭" checked>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">*备注</label>
+        <div class="layui-input-inline" style="width: 300px">
+            <input type="tel" name="remark" lay-verify="required" value="{{ users_data.remark }}" autocomplete="off"
+                   class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+
+
+</form>
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //创建一个编辑器
+        var editIndex = layedit.build('LAY_demo_editor');
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少5个字符';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(demo1)', function (data) {
+            layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            })
+            return false;
+        });
+
+
+        //表单取值
+        layui.$('#LAY-component-form-getval').on('click', function () {
+            var data = form.val('example');
+            alert(JSON.stringify(data));
+        });
+
+    });
+</script>
+</body>
+</html>

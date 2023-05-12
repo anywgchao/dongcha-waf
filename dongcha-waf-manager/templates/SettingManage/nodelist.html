@@ -1,0 +1,177 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-input-inline {
+            width: 99%;
+        }
+
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">节点管理</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+
+        <div class="layui-tab layui-tab-card" style="margin-bottom: 25px">
+            <div class="layui-tab-content" style="height: 100%">
+                <table class="layui-table" lay-skin="nob" lay-size="sm">
+                    <colgroup>
+                        <col width="140">
+                        <col width="2000">
+                        <col>
+                    </colgroup>
+
+                    <tbody>
+                    <tr>
+                        <td lay-data="{align:'center'}" rowspan="2"><img style="width: 100px;height: 100px;"
+                                                                         src="{% static "images/节点.png" %}"
+                                                                         alt="图片">
+                        </td>
+                        <td style="color: deepskyblue;font-size: 24px">节点管理</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>创建与WAF管理系统连接的集群节点。</td>
+                        <td style="color: #1E9FFF"></td>
+                        <td></td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="layui-row">
+            <div class='layui-col-md9'>
+                <div class="UserTable">
+                    <button class="layui-btn" onclick="x_admin_show('标签分组','{% url 'nodegroupadd' %}',600,500)"><i
+                            class="layui-icon">&#xe61f;</i>标签分组
+                    </button>
+                    <button class="layui-btn" onclick="x_admin_show('添加节点','{% url 'nodeadd' %}',600,400)"><i
+                            class="layui-icon">&#xe61f;</i>添加节点
+                    </button>
+                    <button class="layui-btn" style="background-color:#ff6a00"
+                            onclick="x_admin_show('更新授权','{% url 'impowertimeupdate' %}',600,250)"><i
+                            class="layui-icon">&#xe9aa;</i>更新授权
+                    </button>
+                </div>
+            </div>
+
+            <div class='layui-col-md3'>
+                <div class="layui-col-md9">
+                    <form class="layui-form layui-col-md12" style="display: inline-block;">
+                        <div class="layui-input-inline"><input class="layui-input" placeholder="节点名称"
+                                                               name="name" id="id_name"></div>
+                    </form>
+                </div>
+
+                <div class="UserTable layui-col-md3">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'nodelist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'node_name', title: '名称', sort: true, fixed: true}
+                    , {field: 'node_des', title: '节点接口', sort: true}
+                    , {field: 'node_impowertime', title: '授权到期时间', sort: true}
+                    , {field: 'task_endtime', title: '创建时间', sort: true}
+                    , {field: 'version', title: '版本', sort: true}
+                    , {field: 'node_group', title: '分组', sort: true}
+                    , {title: '操作', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.node_id;
+                if (obj.event === 'edit') {
+                    url = "{% url 'nodeupdate' 'key' %}";
+                    url = url.replace(/key/, data);
+                    x_admin_show('节点编辑', url, 800, 400);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该节点吗', function (index) {
+                        url = "{% url 'nodedel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+
+
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon">&#xe60a;</i>编辑</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#xe60a;</i>删除</a>
+    </script>
+
+{% endblock %}

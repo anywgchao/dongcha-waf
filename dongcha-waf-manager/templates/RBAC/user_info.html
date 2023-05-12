@@ -1,0 +1,294 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>个人资料</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="{% static 'lib/layui/css/layui.css' %}" rel="stylesheet">
+    <script src="{% static 'jquery/jquery-3.3.1.min.js' %}"></script> <!-- jQuery Library -->
+    <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/xadmin.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    <style>
+        .layui-table td, .layui-table th {
+            padding: 5px 0;
+        }
+
+    </style>
+
+</head>
+
+<body style="margin: auto 5%">
+<div style="margin-left: 2%;margin-right: 6%">
+    <hr class="hr15" style="margin-top: 10px;margin-bottom: 0px">
+
+
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a style="line-height:1.6em;margin-top:7px;float:left" href="">个人资料</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:35px"></i>
+        </a>
+    </div>
+    <hr class="hr15">
+</div>
+<div class="x-body layui-anim layui-anim-up layui-col-md6"
+     style="width: 50%;border-style: solid;border-width:.5px;border-color:#e5e5e5;border-radius:20px;margin: 20px 10px">
+
+    <div class="layui-upload" style="margin-left: 20px">
+        <div class="layui-upload-list" style="border:1px solid gainsboro;width: 100px;height: 100px">
+            <img class="layui-upload-img" id="demo1" style="width: 100px;height: 100px"
+                 src='{{ user.profile.user_head }}'>
+            <p id="demoText"></p>
+        </div>
+        <div class="UserTable" style="text-align: center;width: 100px">
+            <button class="layui-btn layui-btn-xs" onclick="x_admin_show('个性头像编辑','{% url 'photoview' %}',600,600)"><i
+                    class="layui-icon"></i>修改头像
+            </button>
+        </div>
+
+    </div>
+
+    <table class="layui-table" lay-skin="nob" style="width: 90%;margin-left: 15px">
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;"><h5>登录账号:</h5></td>
+            <td>{{ user.username }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;"><h5>账号昵称:</h5></td>
+            <td>{{ user.profile.user_nickname }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;"><h5>状态:</h5></td>
+            <td>{{ is_active }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px"><h5>邮箱地址:</h5></td>
+            <td>{{ mail }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px"><h5>手机号:</h5></td>
+            <td>{{ phone }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px"><h5>角色:</h5></td>
+            <td>{{ roles}}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: 120px"><h5>用户来源:</h5></td>
+            <td>Local</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 120px"><h5>注册时间:</h5></td>
+            <td>{{ user.date_joined }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: 120px"><h5>最后登录:</h5></td>
+            <td>{{ user.last_login }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: 120px"><h5>备注:</h5></td>
+            <td>{{ user.profile.description }}</td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+<div class="x-body layui-anim layui-anim-up layui-col-md6"
+     style="width: 40%;border-style: solid; border-width:.5px;border-radius:20px;border-color:#e5e5e5;margin-left: 20px;margin-top: 20px">
+    <table class="layui-table" lay-skin="nob" style="width: 90%;margin-left: 15px">
+
+        <tr>
+            <td style="width: 100px"><h5>MFA认证: </h5></td>
+            <td><span
+                    style="color: {% if user.profile.mfa == '开启' %}green{% else %}red{% endif %}">{{ user.profile.mfa }}</span>
+            </td>
+            {% if user.profile.mfa == '开启' %}
+                <td>
+                    <button type="button" class="layui-btn layui-btn-warm"
+                            onclick="x_admin_show('更新MFA','{% url 'update_mfa' %}',600,600)">更新
+                    </button>
+                </td>{% endif %}{% if user.profile.mfa == '开启' %}
+            <td>
+                <button type="button" class="layui-btn layui-btn-danger"
+                        onclick="x_admin_show('关闭MFA','{% url 'close_mfa' %}',600,600)">关闭
+                </button>
+            </td>{% endif %}
+            <td style="float: right">
+                <button type="button" class="layui-btn"
+                        onclick="x_admin_show('MFA认证','{% url 'psdverify' %}',600,580)">设置
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px">
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+            <td>
+                <hr>
+            </td>
+        </tr>
+
+        <tr>
+            <td><h5>修改密码: </h5></td>
+            <td></td>
+            {% if user.profile.mfa == '开启' %}
+                <td></td>
+                <td></td>{% endif %}
+            <td style="float: right">
+                <button type="button" class="layui-btn"
+                        onclick="x_admin_show('修改密码','{% url 'changepsd' %}',600,350)">更新
+                </button>
+            </td>
+        </tr>
+
+    </table>
+
+
+</div>
+<script>
+    layui.use('upload', function () {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1'
+            , url: 'http://0.0.0.0:8000/view/imgupload/' //改成您自己的上传接口
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+            }
+            , acceptMime: 'image/jpg, image/png'
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

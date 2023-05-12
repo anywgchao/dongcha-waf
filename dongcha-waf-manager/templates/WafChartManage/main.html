@@ -1,0 +1,474 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href=""></a>
+      </span>
+            <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+               href="javascript:location.replace(location.href);" title="刷新">
+                <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+            </a>
+        </div>
+        <div class='layui-row'>
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <form class="layui-form" action="">
+                        <div class="layui-form-item" id="id_times" style="float: right">
+                            <input type="radio" name="contrllerss" value="6" title="1小时">
+                            <input type="radio" name="contrllerss" value="24" title="今天">
+                            <input type="radio" name="contrllerss" value="48" title="最近7天">
+                            <input type="radio" id="id_time" name="contrllerss" value="144" title="最近30天">
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                         lay-arrow="none" style="width: 100%; height: 120px;">
+                        <div carousel-item="" class="layui-fluid">
+                            <ul class="layui-row layui-col-space30  layui-this ">
+                                <li class="layui-col-xs2" style="width: 20%">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3><i class="layui-icon " style="font-size: 24px" ;></i><img
+                                                style="width: 35px;height: 35px;" src="{% static "images/绩效.png" %}"
+                                                alt="图片">拦截总数(次)</h3>
+                                        <p><cite>{{ count }}</cite>
+                                            {% if count_change > 0 %}
+                                                <cite style="font-size: 5px;color: red">+{{ count_change }}</cite>
+                                            {% else %}
+                                                <cite style="font-size: 5px;color: springgreen">{{ count_change }}</cite>
+                                            {% endif %}</p></a>
+                                </li>
+                                <li class="layui-col-xs2 " style="width: 20%">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3><i class="layui-icon" style="font-size: 24px" ;></i><img
+                                                style="width: 35px;height: 35px;" src="{% static "images/风险.png" %}"
+                                                alt="图片">风险拦截数(次)</h3>
+                                        <p><cite>{{ owasp_count }}</cite>
+                                            {% if owasp_change > 0 %}
+                                                <cite style="font-size: 5px;color: red">+{{ owasp_count }}</cite>
+                                            {% else %}
+                                                <cite style="font-size: 5px;color: springgreen">{{ owasp_change }}</cite>
+                                            {% endif %}</p></a>
+                                </li>
+                                <li class="layui-col-xs2" style="width: 20%">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3><i class="layui-icon " style="font-size: 24px" ;></i><img
+                                                style="width: 35px;height: 35px;" src="{% static "images/目标.png" %}"
+                                                alt="图片">cc规则拦截数(次)</h3>
+                                        <p><cite>{{ cc_count }}</cite>
+                                            {% if cc_change > 0 %}
+                                                <cite style="font-size: 5px;color: red">+{{ cc_count }}</cite>
+                                            {% else %}
+                                                <cite style="font-size: 5px;color: springgreen">{{ cc_change }}</cite>
+                                            {% endif %}</p></a>
+                                </li>
+                                <li class="layui-col-xs2" style="width: 20%">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3><i class="layui-icon " style="font-size: 24px" ;></i><img
+                                                style="width: 31px;height: 31px;" src="{% static "images/区域.png" %}"
+                                                alt="图片">非中国区拦截数(次)</h3>
+                                        <p><cite>{{ geo_count }}</cite>
+                                            {% if geo_change > 0 %}
+                                                <cite style="font-size: 5px;color: red">+{{ geo_count }}</cite>
+                                            {% else %}
+                                                <cite style="font-size: 5px;color: springgreen">{{ geo_change }}</cite>
+                                            {% endif %}</p></a>
+                                </li>
+                                <li class="layui-col-xs2" style="width: 20%">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3><i class="layui-icon " style="font-size: 24px" ;></i><img
+                                                style="width: 35px;height: 35px;" src="{% static "images/cc-eye.png" %}"
+                                                alt="图片">被攻击站点</h3>
+                                        <p><cite>{{ attack_count }}</cite>
+                                            {% if attack_change > 0 %}
+                                                <cite style="font-size: 5px;color: red">+{{ attack_count }}</cite>
+                                            {% else %}
+                                                <cite style="font-size: 5px;color: springgreen">{{ attack_change }}</cite>
+                                            {% endif %}</p></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="x-body">
+            <div class="layui-row">
+                <div class="layui-col-md3">
+                    <div id='test' style="width: 100%;height:400px;"></div>
+                </div>
+                <div class="layui-col-md3">
+                    <div id='container' style="width: 100%;height:400px;"></div>
+                </div>
+                <div class="layui-col-md3">
+                    <div id='test1' style="width: 100%;height:400px;"></div>
+                </div>
+                <div class="layui-col-md3">
+                    <div id='test2' style="width: 100%;height:400px;"></div>
+                </div>
+            </div>
+        </div>
+    <div>
+        <div class="layui-row">
+            <div class='layui-col-md7'>
+                <form class="layui-form layui-col-md12 " style="display: inline-block;">
+
+                    <div class="layui-input-inline" style="width: 33%"><input class="layui-input" placeholder="匹配规则"
+                                                                              name="name" id="id_name"></div>
+                    <div class="layui-input-inline" style="width: 33%"><input class="layui-input" placeholder="攻击来源地址"
+                                                                              name="key" id="id_key"></div>
+                    <div class="layui-input-inline" style="width: 32%"><input class="layui-input" placeholder="目标地址"
+                                                                              name="target" id="id_target"></div>
+                </form>
+            </div>
+            <div class='UserTable layui-col-md5'>
+                <button class="layui-btn" data-type="reload" id="searchs"><i class="layui-icon">&#xe615;</i></button>
+            </div>
+        </div>
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script type="text/javascript">
+        option = {
+            title: {
+                text: ''
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['普通攻击', 'XSS攻击', 'SQL注入攻击', '文件读取', '命令攻击', '信息泄露', '其他']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: []
+        };
+
+        var DateSecond = echarts.init(document.getElementById('container'));
+
+        DateSecond.setOption(option);
+        $.get("{% url 'wafgetdatesecond' %}").done(function (data) {
+            DateSecond.setOption({
+                xAxis: [
+                    {
+                        data: data.date
+                    }
+                ],
+                series: [
+                    {
+                        name: '普通攻击',
+                        type: 'line',
+                        smooth: true,
+                        data: data.common_date
+                    },
+                    {
+                        name: 'XSS攻击',
+                        type: 'line',
+                        smooth: true,
+                        data: data.xss_date
+                    },
+                    {
+                        name: 'SQL注入',
+                        type: 'line',
+                        smooth: true,
+                        data: data.sql_date
+                    },
+                    {
+                        name: '文件读取',
+                        type: 'line',
+                        smooth: true,
+                        data: data.file_date
+                    },
+                    {
+                        name: '命令攻击',
+                        type: 'line',
+                        smooth: true,
+                        data: data.command_date
+                    },
+                    {
+                        name: '信息泄露',
+                        type: 'line',
+                        smooth: true,
+                        data: data.info_date
+                    },
+                    {
+                        name: '其他',
+                        type: 'line',
+                        smooth: true,
+                        data: data.other_date
+                    }
+                ]
+            });
+        });
+
+
+        if (option && typeof option === "object") {
+            DateSecond.setOption(option, true);
+        }
+    </script>
+
+    <script type="text/javascript">
+        option = {
+            title: {
+                text: 'web攻击类型',
+                subtext: '',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: []
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        var AttackType = echarts.init(document.getElementById('test'));
+
+        AttackType.setOption(option);
+
+        $.get("{% url 'wafattacktype' %}").done(function (data) {
+            AttackType.setOption({
+                title: {
+                    text: 'web攻击类型'
+                },
+                legend: {
+                    data: data.categories
+                },
+                series: [
+                    {
+                        data: data.data
+                    }
+                ]
+            });
+        });
+
+        if (option && typeof option === "object") {
+            AttackType.setOption(option, true);
+        }
+    </script>
+
+    <script>
+        option = {
+            color: ['#91c7ae'],
+            title: {
+                text: '攻击来源',
+                subtext: '数据来自安全组'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: []
+            },
+            series: [
+                {
+                    name: '',
+                    type: 'bar',
+                    data: []
+                }
+            ]
+        };
+        var Attackorigin = echarts.init(document.getElementById('test1'));
+
+        Attackorigin.setOption(option);
+        $.get("{% url 'wafattackorigin' %}").done(function (data) {
+            Attackorigin.setOption({
+                yAxis: {
+                    data: data.names
+                },
+                series: [
+                    {
+                        data: data.values
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script>
+        option = {
+            color: ['#91c7ae'],
+            title: {
+                text: '被攻击资产',
+                subtext: '数据来自安全组'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: []
+            },
+            series: [
+                {
+                    name: '',
+                    type: 'bar',
+                    data: []
+                }
+            ]
+        };
+        var Targetaddress = echarts.init(document.getElementById('test2'));
+
+        Targetaddress.setOption(option);
+        $.get("{% url 'logtargetaddress' %}").done(function (data) {
+            Targetaddress.setOption({
+                yAxis: {
+                    data: data.names
+                },
+                series: [
+                    {
+                        data: data.values
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+
+   <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'wafsearch' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'request_time', title: '攻击时间', sort: true, width: 180}
+                    , {field: 'attack_origin', title: '攻击来源ip', sort: true, width: 150}
+                    , {field: 'target_address', title: '攻击目标', sort: true}
+                    , {field: 'uri_address', title: 'uri地址', sort: true}
+                    , {field: 'describe', title: '匹配规则', sort: true}
+                    , {field: 'log_type', title: '事件描述', sort: true}
+                    , {title: '详情', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 100}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.log_id;
+                if (obj.event === 'detail') {
+                    url = "{% url 'logsdetail' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('日志详情', url, 800);
+                }
+            });
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            id_rule: $('#id_name').val()
+                            , id_ip: $("#id_key").val()
+                            , id_target: $("#id_target").val()
+                            , istimes: $('input[name="contrllerss"]:checked').val()
+                        }
+                    });
+                }
+            };
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+        </div>
+    </script>
+    <script>
+        $("body").keydown(function () {
+            if (event.keyCode == "13") {//keyCode=13是回车键
+                $('#searchs').click();//换成按钮的id即可
+            }
+        });
+    </script>
+{% endblock %}

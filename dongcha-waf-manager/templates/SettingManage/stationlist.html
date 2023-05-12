@@ -1,0 +1,201 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-input-inline {
+            width: 99%;
+        }
+     .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">站点管理</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-tab layui-tab-card" style="margin-bottom: 25px">
+            <div class="layui-tab-content" style="height: 100%">
+                <table class="layui-table" lay-skin="nob" lay-size="sm">
+                    <colgroup>
+                        <col width="140">
+                        <col width="2000">
+                        <col>
+                    </colgroup>
+
+                    <tbody>
+                    <tr>
+                        <td lay-data="{align:'center'}" rowspan="2"><img style="width: 100px;height: 100px;"
+                                                                         src="{% static "images/站点.png" %}"
+                                                                         alt="图片">
+                        </td>
+                        <td style="color: deepskyblue;font-size: 24px">站点管理</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>站点对象是指，需要WEB应用防火墙防护的网站。可以在该栏目对其进行添加、删除、设置等管理操作。</td>
+                        <td style="color: #1E9FFF"></td>
+                        <td></td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="layui-row">
+            <div class='layui-col-md7'>
+                <div class="UserTable">
+                <button class="layui-btn" style="float: left"
+                        onclick="x_admin_show('添加站点','{% url 'stationadd' %}',800, 700)"><i
+                        class="layui-icon">&#xe61f;</i>添加站点
+                </button>
+
+             <!--   <button class="layui-btn" style="background-color:#ff6a00" data-type="disablechoice"><i class="layui-icon layui-icon-refresh-3"></i>重新加载
+                </button>-->
+                    </div>
+            </div>
+            <div class='layui-col-md5'>
+
+                <div class="layui-col-md10">
+                     <form class="layui-form layui-col-md6" style="padding-right: 2px">
+                    <input class="layui-input" placeholder="站点名称" name="name" id="id_name">
+                </form>
+                <form class="layui-form layui-col-md6" style="padding-right: 2px">
+                    <input class="layui-input" placeholder="站点域名" name="url_name" id="url_name">
+                </form>
+                </div>
+
+                <div class="UserTable layui-col-md2">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'stationlist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'station_name', title: '站点名称', sort: true, fixed: true}
+                    , {field: 'station_url', title: '站点域名', sort: true}
+                    , {field: 'station_agreement', title: '协议类型', sort: true}
+                    , {field: 'station_certficate', title: '已绑定证书', sort: true}
+                    , {field: 'task_endtime', title: '添加时间', sort: true}
+                    , {title: '操作', fixed: 'right', align: 'center', toolbar: '#barDemo', width:240}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.station_id;
+                if (obj.event === 'view') {
+                    url = "{% url 'stationview' 'key' %}";
+                    url = url.replace(/key/, data);
+                    x_admin_show('站点编辑', url, 800);
+                }
+                if (obj.event === 'update') {
+                    url = "{% url 'stationupdate' 'key' %}";
+                    url = url.replace(/key/, data);
+                    x_admin_show('文件编辑', url, 800);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该规则吗', function (index) {
+                        url = "{% url 'stationdel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+
+
+            });
+
+            var $ = layui.$, active = {
+                disablechoice: function () { //获取选中数据
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data
+                        , list = new Array();
+                    for (var i = 0; i < data.length; i++) {
+                        list[i] = data[i].mail
+                    }
+                    layer.confirm('该操作为敏感操作<br>点击确认，重新加载站点', function (index) {
+                        $.post("{% url 'stationreload' %}", {
+                            'user_list': JSON.stringify(list),
+                            'action': 'stop',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                },
+
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , url_name: $("#url_name").val()
+
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-xs" lay-event="view"><i class="layui-icon">&#xe60a;</i>查看</a>
+            <a class="layui-btn layui-btn-xs" lay-event="update"><i class="layui-icon">&#xe60a;</i>编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#xe60a;</i>删除</a>
+    </script>
+
+{% endblock %}

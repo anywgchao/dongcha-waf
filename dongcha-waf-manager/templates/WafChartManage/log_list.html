@@ -1,0 +1,326 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    <style>
+        #count {
+            font-size: 24px;
+            padding-left: 5px;
+        }
+
+        .layui-input-inline {
+            width: 24%;
+        }
+    </style>
+
+    {% csrf_token %}
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">访问日志日志</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class='layui-row'>
+        <div class="layui-card">
+            <div class="layui-card-header">
+                <form class="layui-form" action="">
+                    <div class="layui-form-item" id="id_times" style="float: right">
+                        <input type="radio" name="contrllerss" value="6" title="1小时">
+                        <input type="radio" name="contrllerss" value="24" title="今天">
+                        <input type="radio" name="contrllerss" value="48" title="最近7天">
+                        <input type="radio" id="id_time" name="contrllerss" value="144" title="最近30天">
+                    </div>
+                </form>
+            </div>
+            <div class="layui-card-body">
+                <div class="x-body">
+                    <div class="layui-row">
+                        <div class="layui-col-md4">
+                            <div id='test0' style="width: 100%;height:400px;"></div>
+                        </div>
+                        <div class="layui-col-md4">
+                            <div id='test1' style="width: 100%;height:400px;"></div>
+                        </div>
+                        <div class="layui-col-md4">
+                            <div id='test2' style="width: 100%;height:400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="x-body">
+        <div class="layui-row">
+            <div class='layui-col-md10'>
+                <form class="layui-form layui-col-md12 " style="display: inline-block;">
+
+                    <div class="layui-input-inline"><input class="layui-input" placeholder="来源ip"
+                                                           name="ip" id="id_ip"></div>
+                    <div class="layui-input-inline"><input class="layui-input" placeholder="请求URL"
+                                                           name="url" id="id_url"></div>
+                    <div class="layui-input-inline"><input class="layui-input" placeholder="user-agent"
+                                                           name="user_agent" id="user_agent"></div>
+                    <div class="layui-input-inline"><input class="layui-input" placeholder="请求状态码"
+                                                           name="status" id="status"></div>
+
+                </form>
+            </div>
+
+            <div class='UserTable layui-col-md2'>
+                <button class="layui-btn" data-type="reload" id="searchs"><i class="layui-icon">&#xe615;</i></button>
+            </div>
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+
+    <script type="text/javascript">
+        option = {
+            title: {
+                text: '状态码',
+                subtext: '',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: []
+            },
+            series: [
+                {
+                    name: '状态码',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        var AttackType = echarts.init(document.getElementById('test0'));
+
+        AttackType.setOption(option);
+
+        $.get("{% url 'acceslogstatus' %}").done(function (data) {
+            AttackType.setOption({
+                title: {
+                    text: '状态码'
+                },
+                legend: {
+                    data: data.categories
+                },
+                series: [
+                    {
+                        data: data.data
+                    }
+                ]
+            });
+        });
+
+        if (option && typeof option === "object") {
+            AttackType.setOption(option, true);
+        }
+    </script>
+
+    <script>
+        option = {
+            color: ['#91c7ae'],
+            title: {
+                text: '来源ip',
+                subtext: '数据来自安全组'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: []
+            },
+            series: [
+                {
+                    name: '',
+                    type: 'bar',
+                    data: []
+                }
+            ]
+        };
+        var Attackorigin = echarts.init(document.getElementById('test1'));
+
+        Attackorigin.setOption(option);
+        $.get("{% url 'acceslogiporigin' %}").done(function (data) {
+            Attackorigin.setOption({
+                yAxis: {
+                    data: data.names
+                },
+                series: [
+                    {
+                        data: data.values
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+    <script>
+        option = {
+            color: ['#91c7ae'],
+            title: {
+                text: '访问url',
+                subtext: '数据来自安全组'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: []
+            },
+            series: [
+                {
+                    name: '',
+                    type: 'bar',
+                    data: []
+                }
+            ]
+        };
+        var Targetaddress = echarts.init(document.getElementById('test2'));
+
+        Targetaddress.setOption(option);
+        $.get("{% url 'acceslogurlorigin' %}").done(function (data) {
+            Targetaddress.setOption({
+                yAxis: {
+                    data: data.names
+                },
+                series: [
+                    {
+                        data: data.values
+                    }
+                ]
+            });
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
+
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'loglist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'update_data', title: '请求时间', sort: true, width: 180}
+                    , {field: 'remote_addr', title: '来源ip', sort: true}
+                    , {field: 'url', title: '请求url', sort: true}
+                    , {field: 'request_uri', title: '请求path', sort: true, width: 180}
+                    , {field: 'status', title: '请求状态码', sort: true, width: 180}
+                    , {field: 'http_user_agent', title: 'user-agent', sort: true, width: 150}
+                    , {title: '查看', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 100}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.cmd_id;
+                if (obj.event === 'detail') {
+                    url = "{% url 'logsdetails' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('日志详情', url, 800, 600);
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            ip: $('#id_ip').val()
+                            , url: $("#id_url").val()
+                            , user_agent: $("#user_agent").val()
+                            , status: $("#status").val()
+                            , istimes: $('input[name="contrllerss"]:checked').val()
+                        }
+                    });
+                }
+            };
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+        </div>
+    </script>
+    <script>
+        $("body").keydown(function () {
+            if (event.keyCode == "13") {//keyCode=13是回车键
+                $('#searchs').click();//换成按钮的id即可
+            }
+        });
+    </script>
+
+{% endblock %}

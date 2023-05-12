@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+
+    <body>
+
+    <table class="layui-table">
+  <colgroup>
+    <col width="150">
+    <col>
+  </colgroup>
+  <thead>
+    <tr>
+      <th>站点名称</th>
+      <th>站点域名</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in station %}
+    <tr>
+      <td>{{ item.station_name }}</td>
+      <td>{{ item.station_url }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+
+    </body>
+
+
+
+
+
+{% endblock %}

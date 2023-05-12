@@ -1,0 +1,147 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">用户管理</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+
+
+        <div class="layui-row">
+            <div class='layui-col-md4'>
+                <div class="UserTable">
+                    <button class="layui-btn" onclick="x_admin_show('新增用户','{% url 'userregistview' %}',600,600)"><i
+                            class="layui-icon">&#xe61f;</i>新增用户
+                    </button>
+                </div>
+            </div>
+
+            <div class='layui-col-md8'>
+                <div class="layui-col-md11">
+                    <form class="layui-form layui-col-md12 ">
+                    <div class="layui-input-inline" style="width: 19%"><input class="layui-input" placeholder="登录名"
+                                                                              name="name" id="id_name"></div>
+                    <div class="layui-input-inline" style="width: 19%"><input class="layui-input" placeholder="昵称"
+                                                                              name="nickname" id="id_nickname"></div>
+                    <div class="layui-input-inline" style="width: 19%"><input class="layui-input" placeholder="手机号"
+                                                                              name="phone" id="id_phone"></div>
+                    <div class="layui-input-inline" style="width: 19%"><input class="layui-input" placeholder="角色"
+                                                                              name="role" id="id_role"></div>
+
+                    <div class="layui-input-inline" style="width: 20%">
+                        <select name="contrller" id='id_is_active'>
+                            <option value="">状态</option>
+                            <option value="True">已启用</option>
+                            <option value="False">未启用</option>
+                        </select>
+                    </div>
+                </form>
+                </div>
+
+                <div class="UserTable layui-col-md1">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'userlist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'name', title: '用户名', sort: true, fixed: true}
+                    , {field: 'nickname', title: '用户昵称', sort: true, fixed: true}
+                    , {field: 'mail', title: '邮箱'}
+                    , {field: 'phone', title: '手机号'}
+                    , {field: 'date', title: '注册时间', sort: true}
+                    , {field: 'lastlogin', title: '最后登录'}
+                    , {field: 'role', title: '角色'}
+                    , {field: 'status', title: '状态'}
+                    , {title: '操作', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 15
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.name;
+                if (obj.event === 'detail') {
+                    url = "{% url 'userupdate' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('用户编辑', url, 800);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该用户吗', function (index) {
+                        url = "{% url 'userdel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , nickname: $("#id_nickname").val()
+                            , phone: $("#id_phone").val()
+                            , role: $("#id_role").val()
+                            , active: $("#id_is_active option:selected").val()
+                        }
+                    });
+                }
+            };
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#x1007;</i>删除</a>
+    </script>
+{% endblock %}

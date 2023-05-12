@@ -1,0 +1,222 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        .item_wrap {
+            display: none;
+        }
+    </style>
+
+</head>
+
+{% block index %}
+
+    <div class="x-body layui-anim layui-anim-up">
+        <blockquote class="layui-elem-quote">WAF全局配置&#12288;&#12288;
+            <div class="UserTable" style="float: right;">
+                <button class="layui-btn layui-btn-radius layui-btn-normal"  data-type="disablechoice" ><i
+                        class="layui-icon layui-icon-refresh"></i>升级防护规则库
+                </button>
+            </div>
+        </blockquote>
+
+
+        <form class="layui-form" method='post' action="{% url 'get_setting' %}" enctype="multipart/form-data">
+            <div class="layui-form-item" style="margin-top: 1px">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <label for='id_content'>本地日志记录:</label>&#12288;
+                <input type="checkbox" name="log_local" lay-skin="switch" lay-text="开启|关闭" {{ check.log_local }} ><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">命中规则后，日志记录在本地error.log文件中</label><br/><br/>
+                <label for='id_content'>命中规则记录完整http请求:</label>&#12288;
+                <input type="checkbox" name="log_all" lay-skin="switch" lay-text="开启|关闭" {{ check.log_all }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">命中规则后，记录完整的HTTP请求记录日志，原始post数据</label><br/><br/>
+                <label for='id_content'>基础防护引擎:</label>&#12288;
+                <input type="checkbox" name="base_engine" lay-skin="switch"
+                       lay-text="开启|关闭" {{ check.base_engine }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">启用自定义规则组拦截</label><br/><br/>
+                <label for='id_content'>响应检测引擎:</label>&#12288;
+                <input type="checkbox" name="resp_engine" lay-skin="switch"
+                       lay-text="开启|关闭" {{ check.resp_engine }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">启用Response返回数据进行拦截检测（不建议开启）
+                </label><br/><br/>
+                <label for='id_content'>CC防护引擎:</label>&#12288;
+                <input type="checkbox" name="cc_engine" lay-skin="switch" lay-text="开启|关闭" {{ check.cc_engine }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">启用CC规则组拦截
+                </label><br/><br/>
+                <label for='id_content'>观察模式:</label>&#12288;
+                <input type="checkbox" name="observ_mode" lay-skin="switch"
+                       lay-text="开启|关闭" {{ check.observ_mode }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">开启后，不进行基础防护拦截，只记录拦截日志
+                </label><br/><br/>
+                <label for='id_content'>访问地区限制:</label>&#12288;
+                <input type="checkbox" name="geo_protection" lay-skin="switch"
+                       lay-text="开启|关闭" {{ check.geo_protection }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">开启后非中国区IP将被禁止访问</label><br/><br/>
+                <label for='id_content'>钉钉报警:</label>&#12288;
+                <input type="checkbox" name="alarms" lay-skin="switch"
+                       lay-text="开启|关闭" {{ check.alarms }}><br>
+                <label for='id_content'
+                       style="color: #8e908c; font-size:10px ">开启后将启用钉钉报警</label><br/><br/>
+                <label for='id_content'>重定向URL设置:</label>&#12288;
+                <input type="text" name="http_redirect" placeholder="请输入重定向URL" autocomplete="off"
+                       class="layui-input" value="{{ check.http_redirect }}"><br/>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-toggle="collapse" style="color:white"
+                    data-target="#demo">
+                远程日志记录
+            </button>
+            &#12288;
+            <input type="checkbox" name="log_remote" lay-skin="switch" lay-text="开启|关闭" {{ check.log_remote }}>
+            <label for='id_content'
+                   style="color: #8e908c; font-size:10px ">&#12288;&#12288;开启远程日志记录，命中规则后，日志通过syslog传送到服务端
+            </label><br/>
+
+            <div id="demo" class="collapse in">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <div class="layui-form-item">
+                    <br/>
+                    <label for='id_content'>日志服务器ip地址:</label>
+                    <input type="text" name="log_ip" placeholder="127.0.0.1" value="{{ check.log_ip }}"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <label for='id_content'>日志服务器端口号:</label>
+                    <input type="text" name="log_port" placeholder="5555" value="{{ check.log_port }}"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <label for='id_content'>协议:</label>
+                    <select name="log_sock_type">
+                        <option value="udp" {{ check.udp }}>udp</option>
+                        <option value="tcp" {{ check.tcp }}>tcp</option>
+                    </select>
+                </div>
+                <div class="layui-form-item">
+                    <label for='id_content'>日志缓存值:</label>
+                    <input type="text" name="log_flush_limit" placeholder="1" value="{{ check.log_flush_limit }}"
+                           autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <div><br></div>
+
+
+            <button type="button" class="btn btn-primary" data-toggle="collapse"
+                    data-target="#dem">
+                Cookie安全防护
+            </button>
+            &#12288;
+            <input type="checkbox" name="cookie_safe" lay-skin="switch" lay-text="开启|关闭" {{ check.cookie_safe }}>
+            <label for='id_content'
+                   style="color: #8e908c; font-size:10px ">&#12288;&#12288;开启后，会修改网页cookie内容，防止CSRF、重防页面、爬虫等问题
+            </label><br/>
+
+            <div id="dem" class="collapse in">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <div class="layui-form-item">
+                    <br>
+                    <label for='layui-form-label'>客户端IP绑定</label>&#12288;&#12288;
+                    <input type="checkbox" name="cookie_safe_client_ip"
+                           lay-skin="switch" {{ check.cookie_safe_client_ip }}><br/><br/>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">安全模式</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="cookie_safe_is_safe" value="false" title="兼容模式" checked>
+                        <input type="radio" name="cookie_safe_is_safe" value="true"
+                               title="安全模式" {{ check.cookie_safe_is_safe }}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">秘钥</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="aes_random_key" placeholder="安全秘钥 例:edba47f2d2923db5"
+                               value="{{ check.aes_random_key }}"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div><br></div>
+
+            <div class="layui-row">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+<script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            var $ = layui.$, active = {
+                disablechoice: function () { //获取选中数据
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data
+                        , list = new Array();
+                    for (var i = 0; i < data.length; i++) {
+                        list[i] = data[i].mail
+                    }
+                    layer.confirm('该操作为敏感操作<br>点击确认，升级防护规则库', function (index) {
+                        $.post("{% url 'rulereload' %}", {
+                            'user_list': JSON.stringify(list),
+                            'action': 'stop',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                },
+
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , url_name: $("#url_name").val()
+
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+
+{% endblock %}

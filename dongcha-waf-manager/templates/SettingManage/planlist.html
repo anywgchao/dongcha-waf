@@ -1,0 +1,148 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-input-inline {
+            width: 99%;
+        }
+
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">计划任务</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-row">
+            <div class='layui-col-md7'>
+                <div class="UserTable">
+                    <button class="layui-btn" onclick="x_admin_show('添加计划任务','{% url 'plantask_add' %}',800,700)"><i
+                            class="layui-icon">&#xe61f;</i>添加计划任务
+                    </button>
+                </div>
+            </div>
+
+            <div class='layui-col-md5'>
+                <div class="layui-col-md10">
+                    <form class="layui-form layui-col-md12 ">
+                    <div class="layui-input-inline" style="width: 49%">
+                        <select name="contrller" id='id_is_active'>
+                            <option value="">状态</option>
+                            <option value="True">启用</option>
+                            <option value="False">停止</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline" style="width: 49%"><input class="layui-input" placeholder="任务名称"
+                                                                              name="name" id="id_name"></div>
+                </form>
+                </div>
+
+                <div class="UserTable layui-col-md2">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'planlist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'task_name', title: '名称', sort: true, fixed: true}
+                    , {field: 'task_target', title: '类型', sort: true}
+                    , {field: 'task_period', title: '周期', sort: true}
+                    , {field: 'task_starttime', title: '最新完成时间', sort: true}
+                    , {field: 'task_endtime', title: '终止时间', sort: true}
+                    , {field: 'execution', title: '状态', sort: true}
+                    , {title: '操作', fixed: 'right', align: 'center', toolbar: '#barDemo', width:200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.task_name;
+                if (obj.event === 'detail') {
+                    url = "{% url 'plantaskupdate' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('计划任务', url, 800);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该任务吗', function (index) {
+                        url = "{% url 'plantaskdel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , key: $("#id_key").val()
+                            , target: $("#id_target").val()
+                            , type: $("#id_attack_type option:selected").val()
+                            , istime: $("#id_time option:selected").val()
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#x1007;</i>删除</a>
+    </script>
+
+{% endblock %}

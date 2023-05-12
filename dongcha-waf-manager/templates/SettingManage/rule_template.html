@@ -1,0 +1,127 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">WAF规则模板</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+
+
+
+    <form class="layui-form" method='post' action="{% url 'get_rule' %}" enctype="multipart/form-data">
+        <div class="layui-form-item">
+            <style>
+
+                .layui-table-page {
+                    text-align: right;
+                }
+            </style>
+            {% csrf_token %}
+            {{ form.as_table }}
+        </div>
+        <div class="layui-form-item">
+            <br>
+            <label class="layui-form-label">规则名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="rule" required lay-verify="required" placeholder="请输入标题" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Content-Type</label>
+            <div class="layui-input-block">
+                <select name="content_type" lay-verify="required">
+                    <option value=""></option>
+                    <option value="0">text/html</option>
+                    <option value="1">application/json</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">响应内容</label>
+            <div class="layui-input-block">
+                <textarea name="desc" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+
+
+    <div class="x-body">
+        <table class="layui-table" lay-skin='row' id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'templatelist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'setting_id', title: 'ID', width: 80}
+                    , {field: 'rule_name', title: '名称'}
+                    , {field: 'content_type', title: 'Content Type', sort: true}
+                    , {field: 'setting_use', title: '是否启用', sort: true}
+                    , {field: 'desc', title: '响应内容', sort: true, width: 400}
+                    , {title: '高级选项', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 15
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.setting_id;
+                if (obj.event === 'edit') {
+                    url = "{% url 'settingupdate' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('规则模板编辑', url, 600);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该规则模板吗', function (index) {
+                        url = "{% url 'settingdel' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+            });
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
+    </script>
+{% endblock %}

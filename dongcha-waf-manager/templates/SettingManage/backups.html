@@ -1,0 +1,146 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-input-inline {
+            width: 99%;
+        }
+
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">备份内容</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+
+    <div class="x-body">
+        <div class="layui-row">
+            <div class='layui-col-md5' style="float: left">&nbsp</div>
+
+            <div class='layui-col-md6'>
+                <form class="layui-form layui-col-md12 ">
+                    <div class="layui-input-inline" style="width: 33%">
+                        <select name="type" id='id_type'>
+                            <option value="">任务类型</option>
+                            <option value="审计日志备份">审计日志备份</option>
+                            <option value="访问日志备份">访问日志备份</option>
+                            <option value="数据库备份">数据库备份</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline" style="width: 33%"><input type="text" class="layui-input"
+                                                                              id="start_time" placeholder="选择起始时间">
+                    </div>
+                    <div class="layui-input-inline" style="width: 32%"><input type="text" class="layui-input"
+                                                                              id="end_time" placeholder="选择结束时间"></div>
+
+                </form>
+            </div>
+            <div class='layui-col-md1'>
+                <div class="UserTable">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script>
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#start_time' //指定元素
+            });
+            laydate.render({
+                elem: '#end_time' //指定元素
+            });
+        });
+    </script>
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'backupslist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'start_time', title: '备份开始时间', sort: true, fixed: true}
+                    , {field: 'end_time', title: '备份结束时间', sort: true}
+                    , {field: 'backups_target', title: '任务类型', sort: true}
+                    , {field: 'backups_name', title: '文件名', sort: true}
+                    , {field: 'backups_size', title: '备份大小(MB)', sort: true}
+                    , {title: '详情', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 100}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.backups_name;
+                if (obj.event === 'detail') {
+                    url = "{% url 'backupdownload' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('', url, 200, 200);
+                    $.get(url, function () {
+                        setTimeout(function () {
+                            location.replace(location.href);
+                        }, 1000)
+                    });
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            start_time: $('#start_time').val()
+                            , end_time: $('#end_time').val()
+                            , type: $("#id_type option:selected").val()
+
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>下载</a>
+        </div>
+    </script>
+
+{% endblock %}

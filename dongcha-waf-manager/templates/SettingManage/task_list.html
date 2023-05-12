@@ -1,0 +1,472 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+
+
+    <style>
+
+        #img {
+            width: 500px;
+            height: 500px;
+            display: none;
+        }
+
+        button {
+            width: 200px;
+            height: 50px;
+            border-radius: 10px;
+            font-size: 20px;
+            margin: 11px;
+            background-color: #666666;
+            color: #ffffff;
+        }
+
+        .on {
+            display: none;
+        }
+
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+
+    <script src="{% static 'jquery/jquery-3.3.1.min.js' %}"></script> <!-- jQuery Library -->
+
+    <div class="x-body layui-anim layui-anim-up">
+        <form class="layui-form" method='post' action="{% url post_url argu %}" enctype="multipart/form-data">
+            <div class="layui-form-item" style="margin-bottom: 0">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <br>
+            </div>
+            <label>开始时间:</label><br/>
+            <div class="layui-input-inline">
+                <input style="width: 200%;height: 38px;border: 1px solid #ccc;border-radius: 2px; margin-left: 5px;margin-top: 1px"
+                       type="text" class="layui-input" id="time_start" name="time_start"
+                       value="{{ task_data.time_start }}" placeholder="请选择开始时间">
+            </div>
+            <br>
+            <label>结束时间:</label><br/>
+            <div class="layui-input-inline">
+                <input style="width: 200%;height: 38px;border: 1px solid #ccc;border-radius: 2px; margin-left: 5px;margin-top: 1px"
+                       type="text" class="layui-input" id="time_end" name="time_end" value="{{ task_data.time_end }}"
+                       placeholder="请选择结束时间">
+            </div>
+            <br>
+            <label for='id_content'>任务周期:</label><br/>
+
+            <div class="layui-row" style="text-align: center;line-height:40px">
+                <div class="layui-col-xs2" style="border: 1px solid #fff; margin: 2px">
+                    <div class="grid-demo grid-demo-bg1" style="background: lightgrey;height: 40px;text-align: center">
+                        分钟
+                    </div>
+                    <input style="height: 35px; width: 126px" name='min' value="{{ task_data.min }}" type="text"
+                           placeholder="  请输入分钟">
+
+                </div>
+                <div class="layui-col-xs2" style="border: 1px solid #fff; margin: 2px">
+                    <div class="grid-demo" style="background: lightgrey;height: 40px">小时</div>
+                    <input style="height: 35px; width: 126px" name='hour' value="{{ task_data.hour }}" type="text"
+                           placeholder="  请输入小时">
+                </div>
+                <div class="layui-col-xs2" style="border: 1px solid #fff; margin: 2px">
+                    <div class="grid-demo grid-demo-bg1" style="background: lightgrey;height: 40px">日期</div>
+                    <input style="height: 35px; width: 126px" name='dates' value="{{ task_data.dates }}" type="text"
+                           placeholder="  请输入日期">
+                </div>
+                <div class="layui-col-xs2" style="border: 1px solid #fff; margin: 2px">
+                    <div class="grid-demo" style="background: lightgrey;height: 40px">月份</div>
+                    <input style="height: 35px; width: 126px" name='month' value="{{ task_data.month }}" type="text"
+                           placeholder="  请输入月份">
+                </div>
+                <div class="layui-col-xs2" style="border: 1px solid #fff; margin: 2px">
+                    <div class="grid-demo" style="background: lightgrey;height: 40px">星期</div>
+                    <input style="height: 35px; width: 126px" name='week' value="{{ task_data.week }}" type="text"
+                           placeholder="  请输入星期">
+                </div>
+
+
+                <div class="layui-col-xs1" style="border: 1px solid #fff; margin: 2px">
+                    <div style="margin-top: 15px" class="box">
+                        <img style="width: 18px;height: 18px;"
+                             src="{% static 'images/问号.png' %}"></div>
+                </div>
+
+            </div>
+            <div class="main on" style="border:1px solid #e6e6e6;margin-left: 4px;margin-right: 14%">
+                分钟: 0-59<br>
+                小时: 0-23(0表示0点)<br>
+                日期: 1-31<br>
+                月份: 1-12<br>
+                星期: 0-6<br>
+                备注:<br>
+                1）*/1表示，每隔1小时或1天，分钟不能使用*/1<br>
+                2）仅支持（*、/、-）特殊字符<br>
+
+                示例1：<br>
+                分钟 小时 日期 月份 周期<br>
+                5 5 * * 0-6<br>
+                表示：周一到周日，每天5点5分执行一次任务<br>
+
+                示例2：<br>
+                分钟 小时 日期 月份 周期<br>
+                0 0 */1 * *<br>
+                表示：每天0点执行一次任务<br>
+
+                示例3：<br>
+                分钟 小时 日期 月份 周期<br>
+                * */6 * * 1-3<br>
+                表示：星期1-星期3，每6小时执行一次任务<br></div>
+            <br>
+
+            <div class="layui-row">
+                <div class="layui-col-xs6">
+                    <button type="reset" class="layui-btn layui-btn-radius layui-btn-normal">重置表单</button>
+                </div>
+                <div class="layui-col-xs6" align='right'>
+                    <button type="submit" class="layui-btn layui-btn-radius" lay-submit lay-filter="form_post">立即提交
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <script type="text/javascript">
+        $(function () {
+            var o = $(".main");
+            $('.box').on('click', function () {
+                if (!o.hasClass('on')) {
+                    o.addClass('on')
+                } else {
+                    o.removeClass('on');
+                }
+            });
+        })
+    </script>
+
+
+    <script>
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#id_start_time'
+            });
+            laydate.render({
+                elem: '#id_end_time'
+            });
+        });
+        layui.use('layedit', function () {
+            var layedit = layui.layedit;
+
+            layedit.set({
+                uploadImage: {
+                    url: "{% url  'imgupload' %}"
+                    , type: 'post'
+                }
+            });
+            index = layedit.build('id_article_body', {
+                height: 300
+            }); //建立编辑器
+            layui.use('form', function () {
+                var form = layui.form;
+                form.on('submit(form_post)', function (data) {
+                    layedit.sync(index);
+                });
+            });
+        });
+
+
+    </script>
+    <script>
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+
+            //常规用法
+            laydate.render({
+                elem: '#time_start'
+                , type: 'datetime'
+
+            });
+            laydate.render({
+                elem: '#time_end'
+                , type: 'datetime'
+
+            });
+            //国际版
+            laydate.render({
+                elem: '#test1-1'
+                , lang: 'en'
+            });
+
+            //年选择器
+            laydate.render({
+                elem: '#test2'
+                , type: 'year'
+            });
+
+            //年月选择器
+            laydate.render({
+                elem: '#test3'
+                , type: 'month'
+            });
+
+            //时间选择器
+            laydate.render({
+                elem: '#day4'
+                , type: 'time'
+            });
+            laydate.render({
+                elem: '#week4'
+                , type: 'time'
+            });
+            laydate.render({
+                elem: '#month4'
+                , type: 'time'
+            });
+
+            //日期时间选择器
+            laydate.render({
+                elem: '#test5'
+                , type: 'datetime'
+            });
+
+            //日期范围
+            laydate.render({
+                elem: '#test6'
+                , range: true
+            });
+
+            //年范围
+            laydate.render({
+                elem: '#test7'
+                , type: 'year'
+                , range: true
+            });
+
+            //年月范围
+            laydate.render({
+                elem: '#test8'
+                , type: 'month'
+                , range: true
+            });
+
+            //时间范围
+            laydate.render({
+                elem: '#test9'
+                , type: 'time'
+                , range: true
+            });
+
+            //日期时间范围
+            laydate.render({
+                elem: '#test10'
+                , type: 'datetime'
+                , range: true
+            });
+
+            //自定义格式
+            laydate.render({
+                elem: '#test11'
+                , format: 'yyyy年MM月dd日'
+            });
+            laydate.render({
+                elem: '#test12'
+                , format: 'dd/MM/yyyy'
+            });
+            laydate.render({
+                elem: '#test121'
+                , format: 'dd/MM/yyyy'
+            });
+            laydate.render({
+                elem: '#test13'
+                , format: 'yyyyMMdd'
+            });
+            laydate.render({
+                elem: '#test14'
+                , type: 'time'
+                , format: 'H点m分'
+            });
+            laydate.render({
+                elem: '#test15'
+                , type: 'month'
+                , range: '~'
+                , format: 'yyyy-MM'
+            });
+            laydate.render({
+                elem: '#test16'
+                , type: 'datetime'
+                , range: '到'
+                , format: 'yyyy年M月d日H时m分s秒'
+            });
+
+            //开启公历节日
+            laydate.render({
+                elem: '#test17'
+                , calendar: true
+            });
+
+            //自定义重要日
+            laydate.render({
+                elem: '#test18'
+                , mark: {
+                    '0-10-14': '生日'
+                    , '0-12-31': '跨年' //每年的日期
+                    , '0-0-10': '工资' //每月某天
+                    , '0-0-15': '月中'
+                    , '2017-8-15': '' //如果为空字符，则默认显示数字+徽章
+                    , '2099-10-14': '呵呵'
+                }
+                , done: function (value, date) {
+                    if (date.year === 2017 && date.month === 8 && date.date === 15) { //点击2017年8月15日，弹出提示语
+                        layer.msg('这一天是：中国人民抗日战争胜利72周年');
+                    }
+                }
+            });
+
+            //限定可选日期
+            var ins22 = laydate.render({
+                elem: '#test-limit1'
+                , min: '2016-10-14'
+                , max: '2080-10-14'
+                , ready: function () {
+                    ins22.hint('日期可选值设定在 <br> 2016-10-14 到 2080-10-14');
+                }
+            });
+
+            //前后若干天可选，这里以7天为例
+            laydate.render({
+                elem: '#test-limit2'
+                , min: -7
+                , max: 7
+            });
+
+            //限定可选时间
+            laydate.render({
+                elem: '#test-limit3'
+                , type: 'time'
+                , min: '09:30:00'
+                , max: '17:30:00'
+                , btns: ['clear', 'confirm']
+            });
+
+            //同时绑定多个
+            lay('.test-item').each(function () {
+                laydate.render({
+                    elem: this
+                    , trigger: 'click'
+                });
+            });
+
+            //初始赋值
+            laydate.render({
+                elem: '#test19'
+                , value: '1989-10-14'
+                , isInitValue: true
+            });
+
+            //选中后的回调
+            laydate.render({
+                elem: '#test20'
+                , done: function (value, date) {
+                    layer.alert('你选择的日期是：' + value + '<br>获得的对象是' + JSON.stringify(date));
+                }
+            });
+
+            //日期切换的回调
+            laydate.render({
+                elem: '#test21'
+                , change: function (value, date) {
+                    layer.msg('你选择的日期是：' + value + '<br><br>获得的对象是' + JSON.stringify(date));
+                }
+            });
+            //不出现底部栏
+            laydate.render({
+                elem: '#test22'
+                , showBottom: false
+            });
+
+            //只出现确定按钮
+            laydate.render({
+                elem: '#test23'
+                , btns: ['confirm']
+            });
+
+            //自定义事件
+            laydate.render({
+                elem: '#test24'
+                , trigger: 'mousedown'
+            });
+
+            //点我触发
+            laydate.render({
+                elem: '#test25'
+                , eventElem: '#test25-1'
+                , trigger: 'click'
+            });
+
+            //双击我触发
+            lay('#test26-1').on('dblclick', function () {
+                laydate.render({
+                    elem: '#test26'
+                    , show: true
+                    , closeStop: '#test26-1'
+                });
+            });
+
+            //日期只读
+            laydate.render({
+                elem: '#test27'
+                , trigger: 'click'
+            });
+
+            //非input元素
+            laydate.render({
+                elem: '#test28'
+            });
+
+            //墨绿主题
+            laydate.render({
+                elem: '#test29'
+                , theme: 'molv'
+            });
+
+            //自定义颜色
+            laydate.render({
+                elem: '#test30'
+                , theme: '#393D49'
+            });
+
+            //格子主题
+            laydate.render({
+                elem: '#test31'
+                , theme: 'grid'
+            });
+
+
+            //直接嵌套显示
+            laydate.render({
+                elem: '#test-n1'
+                , position: 'static'
+            });
+            laydate.render({
+                elem: '#test-n2'
+                , position: 'static'
+                , lang: 'en'
+            });
+            laydate.render({
+                elem: '#test-n3'
+                , type: 'month'
+                , position: 'static'
+            });
+            laydate.render({
+                elem: '#test-n4'
+                , type: 'time'
+                , position: 'static'
+            });
+        });
+    </script>
+{% endblock %}

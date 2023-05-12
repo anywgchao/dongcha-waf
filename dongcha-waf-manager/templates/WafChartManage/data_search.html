@@ -1,0 +1,198 @@
+{% extends "index.html" %}
+{% load staticfiles %}
+
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+     <style>
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">WAF日志搜索</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="x-body">
+            <div class="layui-row">
+                <div id='test' style="width: 100%;height:400px;"></div>
+            </div>
+        </div>
+        <div class="layui-row">
+            <div class='layui-col-md10'>
+                <form class="layui-form layui-col-md12 " style="display: inline-block;">
+
+                    <div class="layui-input-inline" style="width: 20%"><input class="layui-input" placeholder="内容搜索"
+                                                                              name="name" id="id_name"></div>
+                    <div class="layui-input-inline" style="width: 20%"><input class="layui-input" placeholder="攻击来源地址"
+                                                                              name="key" id="id_key"></div>
+                    <div class="layui-input-inline" style="width: 20%"><input class="layui-input" placeholder="目标地址"
+                                                                              name="target" id="id_target"></div>
+                    <div class="layui-input-inline" style="width: 19%">
+                        <select id="id_attack_type">
+                            <option value="">日志类型</option>
+                            <option value="owasp_log">owasp_log</option>
+                            <option value="geo_log">geo_log</option>
+                            <option value="cc_log">cc_log</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline" style="width: 19%">
+                        <select name="contrllers" id="id_time">
+                            <option value="">时间</option>
+                            <option value=1>1小时</option>
+                            <option value=12>12小时</option>
+                            <option value=72>3天</option>
+                            <option value=240>10天</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class='UserTable layui-col-md2'>
+                <button class="layui-btn" data-type="reload"><i class="layui-icon">&#xe615;</i></button>
+            </div>
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script>
+        option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: []
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            xAxis: [
+                {
+                    type: 'category',
+                    data: []
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: []
+        };
+
+        var VulnName = echarts.init(document.getElementById('test'));
+
+        VulnName.setOption(option);
+        $.get("{% url 'logcount' %}").done(function (data) {
+            VulnName.setOption({
+                title: {
+                    text: '每小时日志量'
+                },
+                legend: {
+                    data: []
+                },
+                xAxis: [
+                    {
+                        data: data.categories
+                    }
+                ],
+                series: [
+                    {
+                        name: '每小时日志量',
+                        type: 'bar',
+                        data: data.data,
+                        itemStyle: {
+                            normal: {
+                                color: function (params) {
+                                    // build a color map as your need.
+                                    var colorList = ['#3398DB'];
+                                    return colorList[params.dataIndex]
+                                }
+                            }
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'wafsearch' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'log_type', title: '日志类型', sort: true, fixed: true, width: 150}
+                    , {field: 'request_time', title: '请求时间', sort: true, width: 180}
+                    , {field: 'attack_origin', title: '攻击来源地址', sort: true, event: 'Asset', width: 150}
+                    , {field: 'target_address', title: '目标地址', sort: true}
+                    , {field: 'uri_address', title: 'uri地址', sort: true}
+                    , {field: 'describe', title: '匹配规则', sort: true}
+                    , {title: '详情', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 100}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.log_id;
+                if (obj.event === 'detail') {
+                    url = "{% url 'logsdetail' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('日志详情', url, 800);
+                }
+            });
+
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: $('#id_name').val()
+                            , key: $("#id_key").val()
+                            , target: $("#id_target").val()
+                            , type: $("#id_attack_type option:selected").val()
+                            , istime: $("#id_time option:selected").val()
+                        }
+                    });
+                }
+            };
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+        </div>
+    </script>
+
+{% endblock %}

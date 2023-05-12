@@ -1,0 +1,155 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<!-- 为使用方便，直接使用jquery.js库，如您代码中不需要，可以去掉 -->
+<script src="{% static 'js/jquery-1.12.3.min.js' %}"></script>
+
+<!-- 引入封装了failback的接口-initGeetest -->
+<script src="https://static.geetest.com/static/tools/gt.js"></script>
+<script src="{% static 'js/gt.js' %}"></script>
+
+
+<body>
+<div class="lowin">
+    <div class="lowin-brand">
+        <img src="{% static 'images/aiwrap.png' %}" alt="logo">
+    </div>
+    <div class="lowin-wrapper">
+        <div class="lowin-box lowin-login">
+            <div class="lowin-box-inner">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    {% if error %}
+                        <div style="text-align: center;">
+                            <span style="color: #ff6464"><strong>温馨提示: </strong> {{ error }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="lowin-group">
+                        <label style="color:#44a0b3">邮箱 或 手机号</label>
+                        <input type="text" id="username1" autocomplete="email" name="user" class="lowin-input"
+                               style="color:#44a0b3">
+                    </div>
+                    <div class="lowin-group password-group">
+                        <label style="color:#44a0b3">密码 <a href="http://sso.test.com/login/findBack.html"
+                                                           class="forgot-link">忘记密码?</a></label>
+                        <input type="password" id='password1' name="pwd" autocomplete="current-password"
+                               class="lowin-input" style="color:#44a0b3">
+                    </div>
+                     <br>
+
+                    <div id="btn" class="lowin-btn btn" style="text-align: center">登录</div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <br>
+    <footer class="lowin-footer" style="color:#44a0b3">
+        <p>Copyright ©2020 土夫WEB安全防御平台 All Rights Reserved.</p>
+        <p>support@tufusec.com</p>
+    </footer>
+</div>
+
+<script src="{% static 'js/auth.js' %}"></script>
+<script>
+    Auth.init({
+        login_url: '#login',
+        forgot_url: '#forgot'
+
+    });
+</script>
+
+
+<script>
+    var handler = function (captchaObj) {
+        captchaObj.onReady(function () {
+            $("#wait").hide();
+        }).onSuccess(function () {
+            var result = captchaObj.getValidate();
+            if (!result) {
+                return alert('请完成验证');
+            }
+            $.ajax({
+                url: '/view/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    username: $('#username1').val(),
+                    password: $('#password1').val(),
+                    geetest_challenge: result.geetest_challenge,
+                    geetest_validate: result.geetest_validate,
+                    geetest_seccode: result.geetest_seccode,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                   // console.log("data", data)
+                    if (data.msg === 'success') {
+                        setTimeout(function () {
+                            window.location.href=data.url
+                        }, 400);
+                    } else if (data.status === 'fail') {
+                        setTimeout(function () {
+                            captchaObj.reset();
+                        }, 1500);
+                    }
+                    if (data.code === '201') {
+                        setTimeout(function () {
+                            captchaObj.reset();
+                        }, 1500);
+                    }
+                    else if (data.status === 'fail') {
+                        setTimeout(function () {
+                            captchaObj.reset();
+                        }, 1500);
+                    }
+                },
+                error:function (err) {
+                    console.log("err", err)
+                }
+            });
+        });
+        $('#btn').click(function () {
+            // 调用之前先通过前端表单校验
+
+            captchaObj.verify();
+        });
+        // 更多接口说明请参见：http://docs.geetest.com/install/client/web-front/
+    };
+
+
+    $.ajax({
+        url: "/view/pc-geetest/register?t=" + (new Date()).getTime(), // 加随机数防止缓存
+        type: "get",
+        dataType: "json",
+        success: function (data) {
+
+            // 调用 initGeetest 进行初始化
+            // 参数1：配置参数
+            // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它调用相应的接口
+            initGeetest({
+                // 以下 4 个配置参数为必须，不能缺少
+                gt: data.gt,
+                challenge: data.challenge,
+                offline: !data.success, // 表示用户后台检测极验服务器是否宕机
+                new_captcha: data.new_captcha, // 用于宕机时表示是新验证码的宕机
+
+                product: "bind", // 产品形式，包括：float，popup
+                width: "300px",
+                https: true
+
+                // 更多配置参数说明请参见：http://docs.geetest.com/install/client/web-front/
+            }, handler);
+        }
+    });
+</script>
+
+</body>
+</html>

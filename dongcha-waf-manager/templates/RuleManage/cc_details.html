@@ -1,0 +1,125 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+
+	<span class="layui-breadcrumb">
+        <a href="">&#12288;WAF规则管理</a>
+      </span>
+        <a class="layui-btn layui-btn-small  layui-btn-normal"
+           style="line-height:1.6em;margin-top:3px;margin-right:-15px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;margin-right:3px;float:right"
+           href="javascript:window.history.back(-1);" title="返回">
+            <i class="layui-icon layui-icon-return" style="line-height:30px"></i>
+        </a>
+
+    </div>
+
+    <div class="x-body">
+        <div class="layui-row">
+            <div class='layui-col-md9'>
+                <div class="UserTable">
+                    <button class="layui-btn" style="float: left"
+                            onclick="x_admin_show('新建规则','{% url 'ccdetailscreate' ccgroup_id.ccgroup_id %}',800)"><i
+                            class="layui-icon">&#xe61f;</i>新建规则
+                    </button>
+                </div>
+            </div>
+            <div class='layui-col-md3'>
+                <div class="layui-col-md9">
+                    <form class="layui-form layui-col-md12" style="padding-right: 2px">
+                        <input class="layui-input" placeholder="ID" name="name" id="id_name">
+                    </form>
+                </div>
+
+                <div class="UserTable layui-col-md3">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+    <script>
+
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'ccdetaillist' ccgroup_id.ccgroup_id %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {field: 'cc_id', title: 'ID', width: 140}
+                    , {field: 'cc_detail', title: '详情', sort: true}
+                    , {field: 'kind', title: '种类', sort: true, width: 140}
+                    , {field: 'handle', title: '动作', sort: true, width: 150}
+                    , {field: 'log', title: '是否有日志', sort: true, width: 120}
+                    , {field: 'level', title: '严重程度', sort: true, width: 140}
+                    , {field: 'rule_use', title: '是否启用', sort: true, width: 120}
+                    , {title: '高级选项', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 15
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.cc_id;
+                if (obj.event === 'edit') {
+                    url = "{% url 'ccupdate' 'key' %}";
+                    url = url.replace(/key/, data);
+                    x_admin_show('规则编辑', url, 800);
+                } else if (obj.event === 'del') {
+                    layer.confirm('该操作为敏感操作<br>确定删除该规则吗', function (index) {
+                        url = "{% url 'delcc' '0' %}";
+                        url = url.replace(/0/, data);
+                        $.post(url, {
+                            'request_id': data,
+                            'action': 'del',
+                            'csrfmiddlewaretoken': csrf
+                        }, function (res) {
+                            layer.msg(res.error);
+                            setTimeout(function () {
+                                location.replace(location.href);
+                            }, 2000)
+                        });
+                    })
+                }
+            });
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs " lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" id="delete"><i
+                class="layui-icon">&#xe640;</i>删除</a>
+    </script>
+
+{% endblock %}

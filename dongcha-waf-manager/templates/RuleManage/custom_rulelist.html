@@ -1,0 +1,114 @@
+{% extends "index.html" %}
+<meta charset="UTF-8">
+
+{% block index %}
+    {% csrf_token %}
+    <style>
+        .layui-table-page {
+            text-align: right;
+        }
+    </style>
+    <div class="x-nav">
+	<span class="layui-breadcrumb">
+        <a href="">WAF自定义规则管理组</a>
+      </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+           href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+        </a>
+    </div>
+
+
+
+    <div class="x-body">
+        <div class="layui-row">
+            <div class='layui-col-md9'>
+                <div class="UserTable">
+                    <button class="layui-btn" style="float: left"
+                            onclick="x_admin_show('新建规则组','{% url 'rulescreate' %}',800)"><i
+                            class="layui-icon">&#xe61f;</i>新建规则组
+                    </button>
+                </div>
+            </div>
+            <div class='layui-col-md3'>
+                <div class="layui-col-md9">
+                    <form class="layui-form layui-col-md12" style="padding-right: 2px">
+                        <input class="layui-input" placeholder="ID" name="name" id="id_name">
+                    </form>
+                </div>
+
+                <div class="UserTable layui-col-md3">
+                    <button class="layui-btn" data-type="reload" style="float: right"><i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <table class="layui-hide" id="asset_table" lay-filter="asset"></table>
+    </div>
+
+
+
+    <script>
+        var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+
+        layui.use('table', function () {
+            var table = layui.table;
+            //方法级渲染
+            table.render({
+                elem: '#asset_table'
+                , url: "{% url 'rulestablelist' %}"
+                , method: 'post'
+                , where: {'csrfmiddlewaretoken': csrf}
+                , cols: [[
+                    {checkbox: true, fixed: true}
+                    , {field: 'rules_id', title: 'ID'}
+                    , {field: 'rules_details', title: '详情', sort: true}
+                    , {field: 'detection', title: '检测阶段', sort: true}
+                    , {field: 'rules_use', title: '是否启用', sort: true}
+                    , {field: 'rules_num', title: '规则数', sort: true}
+                    , {field: 'rules_version', title: '版本号', sort: true}
+                    , {field: 'rules_updatetime', title: '更新时间', sort: true}
+                    , {title: '高级选项', fixed: 'right', align: 'center', toolbar: '#barDemo', width: 200}
+                ]]
+                , id: 'testReload'
+                , page: true
+                , limit: 15
+                , text: {
+                    none: '暂无相关数据'
+                }
+            });
+
+            table.on('tool(asset)', function (obj) {
+                var data = obj.data.rules_id;
+                if (obj.event === 'Asset') {
+                    url = "{% url 'rulesdetailsview' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('规则组编辑', url);
+                } else if (obj.event === 'edit') {
+                    url = "{% url 'rulesupdate' '0' %}";
+                    url = url.replace(/0/, data);
+                    x_admin_show('规则组编辑', url, 800);
+                } else if (obj.event === 'detail') {
+                    url = "{% url 'rulesdetailsview' '0' %}";
+                    url = url.replace(/0/, data);
+                    window.location.href = (url);
+
+                    //window.open(url);
+                }
+            });
+
+
+            $('.UserTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+        <a class="layui-btn layui-btn-xs " lay-event="detail"><i class="layui-icon">&#xe60a;</i>详情</a>
+    </script>
+{% endblock %}

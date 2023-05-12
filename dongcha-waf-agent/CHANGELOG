@@ -1,0 +1,8 @@
+
+dongcha-waf-agent 1.2 (05/08/2020)
+- build
+	* add openwaf-config.conf manager interface
+
+dongcha-waf-agent 1.0 (05/08/2020)
+- build
+	* version 1.0 build
